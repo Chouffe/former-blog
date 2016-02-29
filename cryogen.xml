@@ -3,7 +3,7 @@
 <channel>
 <atom:link href='http://simplelambda.com' rel='self' type='application/rss+xml'/>
 <title>
-Simple Lambda
+λambda Closure
 </title>
 <link>
 http://simplelambda.com
@@ -12,7 +12,7 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Sun, 28 Feb 2016 12:28:45 -0800
+Sun, 28 Feb 2016 19:34:20 -0800
 </lastBuildDate>
 <generator>
 clj-rss
@@ -28,7 +28,14 @@ http://simplelambda.com/posts/2016-02-27-test.html
 Test
 </title>
 <description>
-&lt;h3&gt;&lt;a name=&quot;hello&amp;#95;world&quot;&gt;&lt;/a&gt;Hello World&lt;/h3&gt;&lt;p&gt; This is my first post! &lt;img src=&quot;/img/cryogen.png&quot; alt=&quot;Cryogen&quot; /&gt;&lt;/p&gt;&lt;p&gt; Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Nunc sodales pharetra massa, eget fringilla ex ornare et.  Nunc mattis diam ac urna finibus sodales. Etiam sed ipsum  et purus commodo bibendum. Cras libero magna, fringilla  tristique quam sagittis, volutpat auctor mi. Aliquam luctus,  nulla et vestibulum finibus, nibh justo semper tortor, nec  vestibulum tortor est nec nisi.&lt;/p&gt;
+&lt;h3&gt;&lt;a name=&quot;hello&amp;#95;world&quot;&gt;&lt;/a&gt;Hello World&lt;/h3&gt;&lt;p&gt; This is my first post!&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn fibo
+  &amp;quot;Fibonacci function&amp;quot;
+  &amp;#91;n&amp;#93;
+  &amp;#40;if &amp;#40;&amp;lt;= n 1&amp;#41;
+    n
+    &amp;#40;+ &amp;#40;fibo &amp;#40;dec n&amp;#41;&amp;#41;
+       &amp;#40;fibo &amp;#40;dec &amp;#40;dec n&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt; Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sodales pharetra massa, eget fringilla ex ornare et. Nunc mattis diam ac urna finibus sodales. Etiam sed ipsum et purus commodo bibendum. Cras libero magna, fringilla tristique quam sagittis, volutpat auctor mi. Aliquam luctus, nulla et vestibulum finibus, nibh justo semper tortor, nec vestibulum tortor est nec nisi.
 </description>
 <enclosure>
 
