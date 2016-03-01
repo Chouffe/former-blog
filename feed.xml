@@ -12,151 +12,178 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Sun, 28 Feb 2016 19:34:20 -0800
+Mon, 29 Feb 2016 20:59:25 -0800
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
 <item>
 <guid>
-http://simplelambda.com/posts/2016-02-27-test.html
+http://simplelambda.com/posts/2016-02-29-snake-clojurescript-reagent.html
 </guid>
 <link>
-http://simplelambda.com/posts/2016-02-27-test.html
+http://simplelambda.com/posts/2016-02-29-snake-clojurescript-reagent.html
 </link>
 <title>
-Test
+Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent
 </title>
 <description>
-&lt;h3&gt;&lt;a name=&quot;hello&amp;#95;world&quot;&gt;&lt;/a&gt;Hello World&lt;/h3&gt;&lt;p&gt; This is my first post!&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn fibo
-  &amp;quot;Fibonacci function&amp;quot;
-  &amp;#91;n&amp;#93;
-  &amp;#40;if &amp;#40;&amp;lt;= n 1&amp;#41;
-    n
-    &amp;#40;+ &amp;#40;fibo &amp;#40;dec n&amp;#41;&amp;#41;
-       &amp;#40;fibo &amp;#40;dec &amp;#40;dec n&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
-&lt;/code&gt;&lt;/pre&gt; Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sodales pharetra massa, eget fringilla ex ornare et. Nunc mattis diam ac urna finibus sodales. Etiam sed ipsum et purus commodo bibendum. Cras libero magna, fringilla tristique quam sagittis, volutpat auctor mi. Aliquam luctus, nulla et vestibulum finibus, nibh justo semper tortor, nec vestibulum tortor est nec nisi.
+&lt;h2&gt;&lt;a name=&quot;introduction&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;Functional Programming is finally getting broadly used in the frontend! This is fantastic news! I have been programming in Clojure/ClojureScript for about 2 years. It seems to me that nothing can get quite close to it in terms of productivity and simplicity. So let's give it a try and see what else is out there.&lt;h2&gt;&lt;a name=&quot;rationale&quot;&gt;&lt;/a&gt;Rationale&lt;/h2&gt;I am starting this series of tutorials to compare different frontend abstractions to build modern real world applications. The goal is to provide the reader with some comparisons on different functional abstractions. I will focus on the following ones:&lt;ul&gt;&lt;li&gt;ClojureScript + Reagent&lt;/li&gt;&lt;li&gt;ClojureScript + Om&lt;/li&gt;&lt;li&gt;Elm&lt;/li&gt;&lt;li&gt;ReactJS&lt;/li&gt;&lt;/ul&gt;&lt;h2&gt;&lt;a name=&quot;clojurescript&amp;#95;and&amp;#95;reagent&quot;&gt;&lt;/a&gt;ClojureScript and Reagent&lt;/h2&gt;The first post will focus on building a Snake Game in ClojureScript and Reagent, using the library re-frame. All the code is available on &lt;a href='https://github.com/Chouffe/snake'&gt;my github&lt;/a&gt;.&lt;p&gt;&lt;img src=&quot;/posts/img/snake/snake.png&quot; alt=&quot;Snake Game&quot; title=&quot;Snake Game&quot; /&gt;&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;setup&quot;&gt;&lt;/a&gt;Setup&lt;/h2&gt;To get started, just go read about &lt;a href='https://github.com/Day8/re-frame'&gt;re-frame&lt;/a&gt;. Then run the following lein command to start an re-frame app.&lt;blockquote&gt;&lt;p&gt; lein new re-frame &lt;project-name&gt; &lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;That should generate the following project dir:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;.
+├── dev-resources
+├── figwheel&amp;#95;server.log
+├── project.clj
+├── README.md
+├── resources
+│   └── public
+├── src
+│   ├── clj
+│   └── cljs
+├── target
+│   ├── classes
+│   ├── figwheel&amp;#95;temp
+│   └── stale
+└── test
+    └── cljs
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;modeling&amp;#95;state&quot;&gt;&lt;/a&gt;Modeling State&lt;/h2&gt;The following concepts are needed to properly model the Snake Game:&lt;ul&gt;&lt;li&gt;Board&lt;ul&gt;&lt;li&gt;width&lt;/li&gt;&lt;li&gt;height&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Snake&lt;ul&gt;&lt;li&gt;position&lt;/li&gt;&lt;li&gt;direction&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Apple position&lt;/li&gt;&lt;li&gt;Points&lt;/li&gt;&lt;li&gt;Is the game over?&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;&lt;a name=&quot;board&quot;&gt;&lt;/a&gt;Board&lt;/h3&gt;The board is defined by a number of rows and columns.  simplest way to express it is to use a tuple of 2 elements &lt;code&gt;&amp;#91;width height&amp;#93;&lt;/code&gt;.&lt;pre&gt;&lt;code&gt;&amp;#40;defn init-board &amp;#91;&amp;#93; &amp;#91;35 25&amp;#93;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;snake&quot;&gt;&lt;/a&gt;Snake&lt;/h3&gt;The snake is modeled with a direction in &lt;code&gt;#{:up :down :right :left}&lt;/code&gt; and a sequence of positions &lt;code&gt;&amp;#91;&amp;#91;x1 y1&amp;#93; &amp;#91;x2 y2&amp;#93;&amp;#93;&lt;/code&gt;.&lt;pre&gt;&lt;code&gt;&amp;#40;defn init-snake &amp;#91;&amp;#93;
+  {:direction :right
+   :body &amp;#91;&amp;#91;3 2&amp;#93; &amp;#91;2 2&amp;#93; &amp;#91;1 2&amp;#93; &amp;#91;0 2&amp;#93;&amp;#93;}&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;state&quot;&gt;&lt;/a&gt;State&lt;/h3&gt;The game state is the combination of all the above&lt;pre&gt;&lt;code&gt;&amp;#40;defn rand-free-position &amp;#91;board unavailable-positions&amp;#93;
+  &amp;#40;-&amp;gt;&amp;gt; board
+       positions
+       &amp;#40;remove &amp;#40;set unavailable-positions&amp;#41;&amp;#41;
+       rand-nth&amp;#41;&amp;#41;
+
+&amp;#40;defn init-state &amp;#91;&amp;#93;
+  &amp;#40;let &amp;#91;snake &amp;#40;init-snake&amp;#41;
+        board &amp;#40;init-board&amp;#41;&amp;#93;
+    {:running? true
+     :board board
+     :snake snake
+     :food &amp;#40;rand-free-position board &amp;#40;:body snake&amp;#41;&amp;#41;
+     :points 0}&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;views&quot;&gt;&lt;/a&gt;The views&lt;/h2&gt;Reagent is a simple wrapper around React. We need to design our views as pure functions of the app-state. Re-frame achieves this by using FRP and subscribing to state changes.&lt;h3&gt;&lt;a name=&quot;score&quot;&gt;&lt;/a&gt;Score&lt;/h3&gt;The view function is very simple. It subscribes to the points value in the app-state.&lt;pre&gt;&lt;code&gt;&amp;#40;defn score &amp;#91;&amp;#93;
+  &amp;#40;let &amp;#91;points &amp;#40;subscribe &amp;#91;:points&amp;#93;&amp;#41;&amp;#93;
+    &amp;#91;:div.score &amp;quot;Score: &amp;quot; @points&amp;#93;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;And here is how a subscription gets registered:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;register-sub :points &amp;#40;fn &amp;#91;db&amp;#93; &amp;#40;reaction &amp;#40;:points @db&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;board&quot;&gt;&lt;/a&gt;Board&lt;/h3&gt;This view will be created with simple html elements. Canvas could have been used for that instead. Here, each cell of the board is a table cell with a given CSS class.&lt;pre&gt;&lt;code&gt;&amp;#40;defn board &amp;#91;&amp;#93;
+  &amp;#40;let &amp;#91;board &amp;#40;subscribe &amp;#91;:board&amp;#93;&amp;#41;
+        snake &amp;#40;subscribe &amp;#91;:snake&amp;#93;&amp;#41;
+        food &amp;#40;subscribe &amp;#91;:food&amp;#93;&amp;#41;&amp;#93;
+    &amp;#40;fn &amp;#91;&amp;#93;
+      &amp;#40;let &amp;#91;&amp;#91;width height&amp;#93; @board
+            {:keys &amp;#91;body&amp;#93;} @snake&amp;#93;
+        &amp;#40;into &amp;#91;:table.stage&amp;#93;
+              &amp;#40;for &amp;#91;y &amp;#40;range height&amp;#41;&amp;#93;
+                &amp;#40;into &amp;#91;:tr {:key y}&amp;#93;
+                      &amp;#40;mapv &amp;#40;fn &amp;#91;x&amp;#93; &amp;#91;:td {:key &amp;#40;str x &amp;quot;.&amp;quot; y&amp;#41;
+                                          :class &amp;#40;cell-class &amp;#91;x y&amp;#93; @food &amp;#40;set body&amp;#41;&amp;#41;}&amp;#93;&amp;#41;
+                            &amp;#40;range width&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn &amp;#94;:private cell-class &amp;#91;position food-position snake-body-positions&amp;#93;
+  &amp;#40;cond
+    &amp;#40;= position food-position&amp;#41;          &amp;quot;food&amp;quot;
+    &amp;#40;get snake-body-positions position&amp;#41; &amp;quot;snake&amp;quot;
+    :else                               &amp;quot;empty&amp;quot;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;game&amp;#95;over&quot;&gt;&lt;/a&gt;Game Over&lt;/h3&gt;When the game is over, an overlay is added on top of the board with a replay button.&lt;pre&gt;&lt;code&gt;&amp;#40;defn game-over &amp;#91;&amp;#93;
+  &amp;#40;let &amp;#91;running? &amp;#40;subscribe &amp;#91;:running?&amp;#93;&amp;#41;&amp;#93;
+    &amp;#40;fn &amp;#91;&amp;#93;
+      &amp;#40;if @running?
+        &amp;#91;:div&amp;#93;
+        &amp;#91;:div.overlay
+         &amp;#91;:div.play {:on-click #&amp;#40;dispatch &amp;#91;:start-game&amp;#93;&amp;#41;}
+          &amp;#91;:h1 &amp;quot;↺&amp;quot;&amp;#93;&amp;#93;&amp;#93;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;game&quot;&gt;&lt;/a&gt;Game&lt;/h3&gt;The main view is then composed of the different components.&lt;pre&gt;&lt;code&gt;&amp;#40;defn game &amp;#91;&amp;#93;
+  &amp;#91;:div.game
+   &amp;#91;score&amp;#93;
+   &amp;#91;board&amp;#93;
+   &amp;#91;game-over&amp;#93;&amp;#93;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;The components are then mounted to the DOM with the function &lt;code&gt;run&lt;/code&gt; defined below.The main entrypoint of an re-frame app is the &lt;code&gt;init&lt;/code&gt; function.&lt;pre&gt;&lt;code&gt;&amp;#40;defn run &amp;#91;&amp;#93;
+  &amp;#40;reagent/render &amp;#91;views/game&amp;#93;
+                  &amp;#40;.getElementById js/document &amp;quot;app&amp;quot;&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn &amp;#94;:export init &amp;#91;&amp;#93;
+  &amp;#40;run&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;game&amp;#95;loop&quot;&gt;&lt;/a&gt;Game Loop&lt;/h2&gt;The game loop is handled with a set-interval call that will create a new game state based on the current one. That state will then be handled by React (Reagent) and the view will get updated.&lt;pre&gt;&lt;code&gt;&amp;#40;defonce snake-moving
+   &amp;#40;js/setInterval #&amp;#40;dispatch &amp;#91;:next-state&amp;#93;&amp;#41; 100&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;Every 100ms, the message :next-state is sent to the handler.&lt;h2&gt;&lt;a name=&quot;handlers&quot;&gt;&lt;/a&gt;Handlers&lt;/h2&gt;&lt;h3&gt;&lt;a name=&quot;game&amp;#95;initialization&quot;&gt;&lt;/a&gt;Game Initialization&lt;/h3&gt;In order to initialize the game, a handler &lt;code&gt;:start-game&lt;/code&gt; is created. It resets the initial state.&lt;pre&gt;&lt;code&gt;&amp;#40;register-handler :start-game &amp;#40;fn  &amp;#91;&amp;#95; &amp;#95;&amp;#93; &amp;#40;db/init-state&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;And the &lt;code&gt;init&lt;/code&gt; function is updated accordingly.&lt;pre&gt;&lt;code&gt;&amp;#40;defn &amp;#94;:export init &amp;#91;&amp;#93;
+  &amp;#40;dispatch-sync &amp;#91;:start-game&amp;#93;&amp;#41;
+  &amp;#40;run&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;changing&amp;#95;direction&quot;&gt;&lt;/a&gt;Changing Direction&lt;/h3&gt;When a player interacts with the keyboard (Up, Down, Left, Right or h, j, k, l for vim users), the direction of the snake should get updated.&lt;pre&gt;&lt;code&gt;&amp;#40;register-handler
+   :change-direction
+   &amp;#40;fn &amp;#91;db &amp;#91;&amp;#95; direction&amp;#93;&amp;#93;
+      &amp;#40;assert &amp;#40;get #{:up :down :left :right} direction&amp;#41;&amp;#41;
+      &amp;#40;assoc-in db &amp;#91;:snake :direction&amp;#93; direction&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;A handler is just a reducer function that takes in the value of the app-state &lt;code&gt;db&lt;/code&gt; and an action and returns a new app-state.Then, a keyboard listener is defined to catch the keystrokes mentioned above.&lt;pre&gt;&lt;code&gt;&amp;#40;def key-code-&amp;gt;move
+   &amp;quot;Mapping from the integer key code to the direction keyword&amp;quot;
+   {38  :up   ; Up Arrow
+    75  :up   ; k
+    40  :down ; Down Arrow
+    74  :down ; j
+    39  :right ; Right Arrow
+    76  :right ; l
+    37  :left  ; Left Arrow
+    72  :left  ; h
+    }&amp;#41;
+
+&amp;#40;defonce key-handler
+   &amp;#40;events/listen
+      js/window
+      &amp;quot;keydown&amp;quot;
+      &amp;#40;fn  &amp;#91;e&amp;#93;
+         &amp;#40;let &amp;#91;key-code &amp;#40;.-keyCode e&amp;#41;&amp;#93;
+            &amp;#40;when &amp;#40;contains? key-code-&amp;gt;move key-code&amp;#41;
+               &amp;#40;re-frame/dispatch &amp;#91;:change-direction &amp;#40;key-code-&amp;gt;move key-code&amp;#41;&amp;#93;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;next&amp;#95;state&quot;&gt;&lt;/a&gt;Next State&lt;/h3&gt;The last thing to do is to implement the handler next-state that will move the snake given the direction and the state of the game.&lt;h4&gt;&lt;a name=&quot;collisions&quot;&gt;&lt;/a&gt;Collisions&lt;/h4&gt;The game is lost when the snake hits a wall or eats itself.&lt;pre&gt;&lt;code&gt;&amp;#40;defn collision? &amp;#91;snake board&amp;#93;
+    &amp;#40;or &amp;#40;wall? next-head board&amp;#41; &amp;#40;eat-itself? snake&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn eat-itself? &amp;#91;{:keys &amp;#91;body&amp;#93; :as snake}&amp;#93;
+  &amp;#40;boolean &amp;#40;get &amp;#40;into #{} body&amp;#41; &amp;#40;next-head-position snake&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn valid? &amp;#91;&amp;#91;x y :as position&amp;#93; &amp;#91;width height :as board&amp;#93;&amp;#93;
+  &amp;#40;and &amp;#40;&amp;lt; -1 x width&amp;#41; &amp;#40;&amp;lt; -1 y height&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;def wall? &amp;#40;complement valid?&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;re-frame/register-handler
+   :next-state
+   &amp;#40;fn &amp;#91;db &amp;#95;&amp;#93;
+      &amp;#40;let &amp;#91;{:keys &amp;#91;snake food board running?&amp;#93;} db&amp;#93;
+         &amp;#40;cond
+            &amp;#40;db/collision? snake board&amp;#41; &amp;#40;assoc db :running? false&amp;#41;
+            &amp;#40;db/food? &amp;#40;db/next-head-position snake&amp;#41; food&amp;#41; &amp;#40;-&amp;gt; db
+                                                              &amp;#40;update :points inc&amp;#41;
+                                                              &amp;#40;update :snake db/move-snake&amp;#41;
+                                                              &amp;#40;dissoc :food&amp;#41;
+                                                              &amp;#40;update :snake db/grow-snake snake&amp;#41;
+                                                              &amp;#40;db/rand-food&amp;#41;&amp;#41;
+            :else &amp;#40;update db :snake db/move-snake&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;Here is the implementation of &lt;code&gt;move-snake&lt;/code&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn next-head-position
+  &amp;#91;{:keys &amp;#91;body direction&amp;#93; :as snake}&amp;#93;
+  &amp;#40;let &amp;#91;&amp;#91;x y :as pos&amp;#93; &amp;#40;first body&amp;#41;&amp;#93;
+    &amp;#40;case direction
+      :left  &amp;#91;&amp;#40;dec x&amp;#41; y&amp;#93;
+      :right &amp;#91;&amp;#40;inc x&amp;#41; y&amp;#93;
+      :up    &amp;#91;x &amp;#40;dec y&amp;#41;&amp;#93;
+      :down  &amp;#91;x &amp;#40;inc y&amp;#41;&amp;#93;&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn move-snake
+  &amp;#91;{:keys &amp;#91;body direction&amp;#93; :as snake}&amp;#93;
+  &amp;#40;update snake :body &amp;#40;fn &amp;#91;body&amp;#93; &amp;#40;cons &amp;#40;next-head-position snake&amp;#41;
+                                       &amp;#40;drop-last body&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;Here is the implementation of &lt;code&gt;grow-snake&lt;/code&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn grow-snake
+  &amp;#91;snake previous-snake&amp;#93;
+  &amp;#40;update snake :body concat &amp;#91;&amp;#40;last &amp;#40;:body previous-snake&amp;#41;&amp;#41;&amp;#93;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;And finally, here is &lt;code&gt;rand-food&lt;/code&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn rand-food &amp;#91;{:keys &amp;#91;snake board&amp;#93; :as state}&amp;#93;
+  &amp;#40;assoc state :food &amp;#40;rand-free-position board &amp;#40;:body snake&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;development&amp;#95;environment&quot;&gt;&lt;/a&gt;Development Environment&lt;/h2&gt;Something that is often not discussed is tooling. Tools are everything. I spent a lot of time fine tuning my environment to increase my productiviy.To be honest, the ecosystem and tooling around Clojure and ClojureScript are just amazing.&lt;h3&gt;&lt;a name=&quot;figwheel&quot;&gt;&lt;/a&gt;Figwheel&lt;/h3&gt;To develop this game I used &lt;a href='https://github.com/bhauman/lein-figwheel'&gt;figwheel&lt;/a&gt; which enables live pushes to the clients. Here is a &lt;a href='https://www.youtube.com/watch?v=KZjFVdU8VLI'&gt;quick demo&lt;/a&gt; of interactive development in ClojureScript.&lt;p&gt;This is what my workflow looks like when developing:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Type something in my text-editor&lt;/li&gt;&lt;li&gt;Save changes&lt;/li&gt;&lt;li&gt;See live changes in the browser&lt;ul&gt;&lt;li&gt;live code reloading&lt;/li&gt;&lt;li&gt;live CSS reloading&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Repeat until done&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;I get instant feedback without leaving my text editor!&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/posts/img/snake/liveupdate.png&quot; alt=&quot;Dev Environment&quot; title=&quot;Figwheel and Interactive Development&quot; /&gt;&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;end&quot;&gt;&lt;/a&gt;The End&lt;/h2&gt;Re-frame is a well thought out combination of &lt;strong&gt;reactive programming&lt;/strong&gt;, &lt;strong&gt;functional programming&lt;/strong&gt; and &lt;strong&gt;immutable data&lt;/strong&gt;.&lt;p&gt;It lets developers focus on the core application in a beautifully simple way. Re-frame emerged from ideas developed in Om, Elm and Flux that we are going to study next.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;pros&quot;&gt;&lt;/a&gt;Pros&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;Clojure ❤&lt;ul&gt;&lt;li&gt;Immutability&lt;/li&gt;&lt;li&gt;Lisp&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Local states are just atoms captured in a closure. Local states can be shared between components.&lt;/li&gt;&lt;li&gt;Reagent is faster than React: All the checks for changes are pointer comparison (thanks to Clojure's immutability)&lt;/li&gt;&lt;li&gt;Pure functions: the side effects are pushed to the system's boundary. They should only exist in the event handlers.&lt;/li&gt;&lt;li&gt;Composition via reactive data flows (unidirectional graph)&lt;/li&gt;&lt;li&gt;Extremely simple (200 lines of code to implement re-frame)&lt;/li&gt;&lt;li&gt;Decomplects view, state, business logic in a functional way&lt;h3&gt;&lt;a name=&quot;cons&quot;&gt;&lt;/a&gt;Cons&lt;/h3&gt;&lt;/li&gt;&lt;li&gt;The views are only in Hiccup Style for now (Clojure Data Structure). That is hard for designers to create their own components...&lt;/li&gt;&lt;/ul&gt;
 </description>
 <enclosure>
 
 </enclosure>
 <pubDate>
-Sat, 27 Feb 2016 00:00:00 -0800
-</pubDate>
-</item>
-<item>
-<guid>
-http://simplelambda.com/posts/2016-01-07-docs.html
-</guid>
-<link>
-http://simplelambda.com/posts/2016-01-07-docs.html
-</link>
-<title>
-Quick Start Guide
-</title>
-<description>
-&lt;p&gt;This intro only documents a subset of Cryogen's features. For additional documentation please see the &lt;a href='http://cryogenweb.org'&gt;cryogen site&lt;/a&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;features&quot;&gt;&lt;/a&gt;Features&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Blog posts and pages with Markdown (default) or AsciiDoc&lt;/li&gt;&lt;li&gt;Tags&lt;/li&gt;&lt;li&gt;Table of contents generation&lt;/li&gt;&lt;li&gt;Plain HTML page templates&lt;/li&gt;&lt;li&gt;Code syntax highlighting&lt;/li&gt;&lt;li&gt;Disqus support&lt;/li&gt;&lt;li&gt;Sitemap generation&lt;/li&gt;&lt;li&gt;RSS feed generation&lt;/li&gt;&lt;li&gt;Sass/SCSS compilation&lt;/li&gt;&lt;/ul&gt;&lt;h2&gt;&lt;a name=&quot;prerequisites&quot;&gt;&lt;/a&gt;Prerequisites&lt;/h2&gt;&lt;p&gt;You will need &lt;a href='https://github.com/technomancy/leiningen'&gt;Leiningen&lt;/a&gt; 2.5.0 or above installed.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;usage&quot;&gt;&lt;/a&gt;Usage&lt;/h2&gt;&lt;h3&gt;&lt;a name=&quot;creating&amp;#95;a&amp;#95;new&amp;#95;site&quot;&gt;&lt;/a&gt;Creating a New Site&lt;/h3&gt;&lt;p&gt;A new site can be created using the Cryogen template as follows:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;lein new cryogen my-blog
-&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;running&amp;#95;the&amp;#95;server&quot;&gt;&lt;/a&gt;Running the Server&lt;/h3&gt;&lt;p&gt;The web server can be started from the &lt;code&gt;my-blog&lt;/code&gt; directory using the &lt;code&gt;lein-ring&lt;/code&gt; plugin:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;lein ring server
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The server will watch for changes in the &lt;code&gt;resources/templates&lt;/code&gt; folder and recompile the content automatically.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;site&amp;#95;configuration&quot;&gt;&lt;/a&gt;Site Configuration&lt;/h3&gt;&lt;p&gt;The site configuration file is found at &lt;code&gt;templates/config.edn&lt;/code&gt;, this file looks as follows:&lt;/p&gt;&lt;pre&gt;&lt;code class=&quot;clojure&quot;&gt;{:site-title         &amp;quot;My Awesome Blog&amp;quot;
- :author             &amp;quot;Bob Bobbert&amp;quot;
- :description        &amp;quot;This blog is awesome&amp;quot;
- :site-url           &amp;quot;http://blogawesome.com/&amp;quot;
- :post-root          &amp;quot;posts&amp;quot;
- :page-root          &amp;quot;pages&amp;quot;
- :post-root-uri      &amp;quot;posts-output&amp;quot;
- :page-root-uri      &amp;quot;pages-output&amp;quot;
- :tag-root-uri       &amp;quot;tags-output&amp;quot;
- :blog-prefix        &amp;quot;/blog&amp;quot;
- :rss-name           &amp;quot;feed.xml&amp;quot;
- :rss-filters        &amp;#91;&amp;quot;cryogen&amp;quot;&amp;#93;
- :recent-posts       3
- :post-date-format   &amp;quot;yyyy-MM-dd&amp;quot;
- :sass-src           nil
- :sass-dest          nil
- :theme              &amp;quot;blue&amp;quot;
- :resources          &amp;#91;&amp;quot;img&amp;quot;&amp;#93;
- :keep-files         &amp;#91;&amp;quot;.git&amp;quot;&amp;#93;
- :disqus?            false
- :disqus-shortname   &amp;quot;&amp;quot;
- :ignored-files      &amp;#91;#&amp;quot;\.#.&amp;#42;&amp;quot; #&amp;quot;.&amp;#42;\.swp$&amp;quot;&amp;#93;
- :posts-per-page     5
- :blocks-per-preview 2
- :previews?          false}
-
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;For information about each key please see the &lt;a href='http://cryogenweb.org/docs/configuration.html'&gt;&quot;Configuration&quot;&lt;/a&gt; portion of the Cryogen documentation site.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;switching&amp;#95;between&amp;#95;markdown&amp;#95;and&amp;#95;asciidoc&quot;&gt;&lt;/a&gt;Switching between Markdown and AsciiDoc&lt;/h3&gt;&lt;p&gt;Cryogen comes with Markdown support as default. If you want to use AsciiDoc instead, open the &lt;code&gt;project.clj&lt;/code&gt; in your created blog (e.g. &lt;code&gt;my-blog&lt;/code&gt;), and change the line in &lt;code&gt;:dependencies&lt;/code&gt; that says &lt;code&gt;cryogen-markdown&lt;/code&gt; to &lt;code&gt;cryogen-asciidoc&lt;/code&gt;. Instead of looking for files ending in &lt;code&gt;.md&lt;/code&gt; in the &lt;code&gt;resources/templates/md&lt;/code&gt; directory, the compiler will now look for files ending in &lt;code&gt;.asc&lt;/code&gt; in the &lt;code&gt;resources/templates/asc&lt;/code&gt; directory.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;selecting&amp;#95;a&amp;#95;theme&quot;&gt;&lt;/a&gt;Selecting a Theme&lt;/h3&gt;&lt;p&gt;The Cryogen template comes with two themes in the &lt;code&gt;resources/templates/themes&lt;/code&gt; folder. To change your blog's theme, change the value of the &lt;code&gt;:theme&lt;/code&gt; key in &lt;code&gt;config.edn&lt;/code&gt;.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;customizing&amp;#95;layouts&quot;&gt;&lt;/a&gt;Customizing Layouts&lt;/h3&gt;&lt;p&gt;Cryogen uses &lt;a href='https://github.com/yogthos/Selmer'&gt;Selmer&lt;/a&gt; templating engine for layouts. Please refer to its documentation to see the supported tags and filters for the layouts.&lt;/p&gt;&lt;p&gt;The layouts are contained in the &lt;code&gt;resources/templates/themes/{theme}/html&lt;/code&gt; folder of the project. By default, the &lt;code&gt;base.html&lt;/code&gt; layout is used to provide the general layout for the site. This is where you would add static resources such as CSS and JavaScript assets as well as define headers and footers for your site.&lt;/p&gt;&lt;p&gt;Each page layout should have a name that matches the &lt;code&gt;:layout&lt;/code&gt; key in the page metadata and end with &lt;code&gt;.html&lt;/code&gt;. Page layouts extend the base layout and should only contain the content relaveant to the page inside the &lt;code&gt;content&lt;/code&gt; block. For example, the &lt;code&gt;tag&lt;/code&gt; layout is located in &lt;code&gt;tag.html&lt;/code&gt; and looks as follows:&lt;/p&gt;&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;{% extends &amp;quot;templates/html/layouts/base.html&amp;quot; %}
-{% block content %}
-&amp;lt;div id=&amp;quot;posts-by-tag&amp;quot;&amp;gt;
-    &amp;lt;h2&amp;gt;Posts tagged {{name}}&amp;lt;/h2&amp;gt;
-    &amp;lt;ul&amp;gt;
-    {% for post in posts %}
-        &amp;lt;li&amp;gt;
-            &amp;lt;a href=&amp;quot;{{post.uri}}&amp;quot;&amp;gt;{{post.title}}&amp;lt;/a&amp;gt;
-        &amp;lt;/li&amp;gt;
-    {% endfor %}
-    &amp;lt;/ul&amp;gt;
-&amp;lt;/div&amp;gt;
-{% endblock %}
-&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;code&amp;#95;syntax&amp;#95;highlighting&quot;&gt;&lt;/a&gt;Code Syntax Highlighting&lt;/h3&gt;&lt;p&gt;Cryogen uses &lt;a href='https://highlightjs.org/'&gt;Highlight.js&lt;/a&gt; for code syntax highlighting. You can add more languages by replacing &lt;code&gt;templates/js/highlight.pack.js&lt;/code&gt; with a customized package from &lt;a href='https://highlightjs.org/download/'&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;The &lt;code&gt; initHighlightingOnLoad&lt;/code&gt; function is called in &lt;code&gt;{theme}/html/base.html&lt;/code&gt;.&lt;/p&gt;&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;script&amp;gt;hljs.initHighlightingOnLoad&amp;#40;&amp;#41;;&amp;lt;/script&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;deploying&amp;#95;your&amp;#95;site&quot;&gt;&lt;/a&gt;Deploying Your Site&lt;/h2&gt;&lt;p&gt;The generated static content will be found under the &lt;code&gt;resources/public&lt;/code&gt; folder. Simply copy the content to a static folder for a server such as Nginx or Apache and your site is now ready for service.&lt;/p&gt;&lt;p&gt;A sample Nginx configuration that's placed in &lt;code&gt;/etc/nginx/sites-available/default&lt;/code&gt; can be seen below:&lt;/p&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;server {
-  listen 80 default&amp;#95;server;
-  listen &amp;#91;::&amp;#93;:80 default&amp;#95;server ipv6only=on;
-  server&amp;#95;name localhost &amp;lt;yoursite.com&amp;gt; &amp;lt;www.yoursite.com&amp;gt;;
-
-  access&amp;#95;log  /var/log/blog&amp;#95;access.log;
-  error&amp;#95;log   /var/log/blog&amp;#95;error.log;
-
-  location / {
-    alias       /var/blog/;
-    error&amp;#95;page  404 = /404.html;
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Simply set &lt;code&gt;yoursite.com&lt;/code&gt; to the domain of your site in the above configuration and ensure the static content is available at &lt;code&gt;/var/blog/&lt;/code&gt;. Finally, place your custom error page in the &lt;code&gt;/var/blog/404.html&lt;/code&gt; file.&lt;/p&gt;&lt;p&gt;More information on deployment can be found &lt;a href='http://cryogenweb.org/docs/deploying-to-github-pages.html'&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;some&amp;#95;sites&amp;#95;made&amp;#95;with&amp;#95;cryogen&quot;&gt;&lt;/a&gt;Some Sites Made With Cryogen&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;&lt;a href='http://carmenla.me/blog/index.html'&gt;Creator's blog&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://cryogenweb.org'&gt;Cryogen Documentation Site&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://yogthos.net/'&gt;Yogthos' blog&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://www.clojure.tn'&gt;Clojure :in Tunisia&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://dl1ely.github.io'&gt;dl1ely.github.io&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://jonase.github.io/nil-recur'&gt;nil/recur&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://tangrammer.github.io/'&gt;on the clojure move&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://blog.jethrokuan.com/'&gt;cognizance&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://www.agynamix.de'&gt;AGYNAMIX Site &amp; Blog&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://eresident.me'&gt;e-Resident Me&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='http://www.chadstovern.com'&gt;Chad Stovern's blog&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='https://greative.jp/'&gt;Greative&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
-</description>
-<enclosure>
-
-</enclosure>
-<pubDate>
-Thu, 07 Jan 2016 00:00:00 -0800
-</pubDate>
-</item>
-<item>
-<guid>
-http://simplelambda.com/posts/2014-11-04-second-post.html
-</guid>
-<link>
-http://simplelambda.com/posts/2014-11-04-second-post.html
-</link>
-<title>
-Yet Another Post
-</title>
-<description>
-&lt;h3&gt;&lt;a name=&quot;this&amp;#95;post&amp;#95;so&amp;#95;fetch&quot;&gt;&lt;/a&gt;This Post So Fetch&lt;/h3&gt;&lt;p&gt;some more stuff happened&lt;/p&gt;
-</description>
-<enclosure>
-
-</enclosure>
-<pubDate>
-Tue, 04 Nov 2014 00:00:00 -0800
-</pubDate>
-</item>
-<item>
-<guid>
-http://simplelambda.com/posts/2014-03-10-first-post.html
-</guid>
-<link>
-http://simplelambda.com/posts/2014-03-10-first-post.html
-</link>
-<title>
-A Post
-</title>
-<description>
-&lt;h3&gt;&lt;a name=&quot;this&amp;#95;post&amp;#95;not&amp;#95;fetch&amp;#95;enough&quot;&gt;&lt;/a&gt;This Post Not Fetch Enough&lt;/h3&gt;&lt;p&gt;some stuff happened&lt;/p&gt;
-</description>
-<enclosure>
-
-</enclosure>
-<pubDate>
-Mon, 10 Mar 2014 00:00:00 -0700
+Mon, 29 Feb 2016 00:00:00 -0800
 </pubDate>
 </item>
 </channel>

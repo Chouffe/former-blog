@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>λambda Closure: Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Alegreya:400italic,700italic,400,700' rel='stylesheet'
+          type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index.html">λambda Closure</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li ><a href="/index.html">Home</a></li>
+                <li
+                ><a href="/archives.html">Archives</a></li>
+                
+                <li
+                >
+                <a href="/pages/about.html">About</a>
+                </li>
+                
+                <!-- <li><a href="/feed.xml">RSS</a></li> -->
+                <!-- <li class="dropdown"> -->
+                <!--     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> -->
+                <!--         More <span class="caret"></span></a> -->
+                <!--     <ul class="dropdown-menu" role="menu"> -->
+                <!--         <1!-- <li class="dropdown-header">Links</li> --1> -->
+                <!--         <1!-- <li><a href="http://cryogenweb.org/docs/home.html">Cryogen Docs</a></li> --1> -->
+                <!--         <1!-- <li><a href="http://carmenla.me/blog/index.html">Carmen's Blog</a></li> --1> -->
+                <!--         <1!--  --1> -->
+
+                <!--         <1!--  --1> -->
+                <!--         <1!-- <li class="divider"></li> --1> -->
+                <!--         <li class="dropdown-header">Recent Posts</li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li> -->
+                <!--          -->
+                <!--          -->
+
+                <!--          -->
+                <!--         <li class="divider"></li> -->
+                <!--         <li class="dropdown-header">Tags</li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Reagent.html">Reagent</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/React.html">React</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/ClojureScript.html">ClojureScript</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Functional Programming.html">Functional Programming</a></li> -->
+                <!--          -->
+                <!--          -->
+                <!--     </ul> -->
+                <!-- </li> -->
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div><!--/.container-fluid -->
+</nav>
+
+
+<div id="sidebar">
+    <h2>Recent Posts</h2>
+    <ul>
+        
+        <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li>
+        
+    </ul>
+
+    <h2>Tags</h2>
+    <ul>
+        
+        <li><a href="/tags/Reagent.html">Reagent</a></li>
+        
+        <li><a href="/tags/React.html">React</a></li>
+        
+        <li><a href="/tags/ClojureScript.html">ClojureScript</a></li>
+        
+        <li><a href="/tags/Functional Programming.html">Functional Programming</a></li>
+        
+    </ul>
+</div>
+
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content">
+                
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-12" id="date">February 29, 2016</div>
+        
+    </div>
+    <h2>Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</h2>
+</div>
+<div>
+    <ol class="content"><li><a href="#introduction">Introduction</a></li><li><a href="#rationale">Rationale</a></li><li><a href="#clojurescript_and_reagent">ClojureScript and Reagent</a></li><li><a href="#setup">Setup</a></li><li><a href="#modeling_state">Modeling State</a></li><ol><li><a href="#board">Board</a></li><li><a href="#snake">Snake</a></li><li><a href="#state">State</a></li></ol><li><a href="#the_views">The views</a></li><ol><li><a href="#score">Score</a></li><li><a href="#board">Board</a></li><li><a href="#game_over">Game Over</a></li><li><a href="#game">Game</a></li></ol><li><a href="#game_loop">Game Loop</a></li><li><a href="#handlers">Handlers</a></li><ol><li><a href="#game_initialization">Game Initialization</a></li><li><a href="#changing_direction">Changing Direction</a></li><li><a href="#next_state">Next State</a></li><ol><li><a href="#collisions">Collisions</a></li></ol></ol><li><a href="#development_environment">Development Environment</a></li><ol><li><a href="#figwheel">Figwheel</a></li></ol><li><a href="#the_end">The End</a></li><ol><li><a href="#pros">Pros</a></li><li><a href="#cons">Cons</a></li></ol></ol>
+    <h2><a name="introduction"></a>Introduction</h2>Functional Programming is finally getting broadly used in the frontend! This is fantastic news! I have been programming in Clojure/ClojureScript for about 2 years. It seems to me that nothing can get quite close to it in terms of productivity and simplicity. So let's give it a try and see what else is out there.<h2><a name="rationale"></a>Rationale</h2>I am starting this series of tutorials to compare different frontend abstractions to build modern real world applications. The goal is to provide the reader with some comparisons on different functional abstractions. I will focus on the following ones:<ul><li>ClojureScript + Reagent</li><li>ClojureScript + Om</li><li>Elm</li><li>ReactJS</li></ul><h2><a name="clojurescript&#95;and&#95;reagent"></a>ClojureScript and Reagent</h2>The first post will focus on building a Snake Game in ClojureScript and Reagent, using the library re-frame. All the code is available on <a href='https://github.com/Chouffe/snake'>my github</a>.<p><img src="/posts/img/snake/snake.png" alt="Snake Game" title="Snake Game" /></p><h2><a name="setup"></a>Setup</h2>To get started, just go read about <a href='https://github.com/Day8/re-frame'>re-frame</a>. Then run the following lein command to start an re-frame app.<blockquote><p> lein new re-frame <project-name> </p></blockquote><p>That should generate the following project dir:</p><pre><code>.
+├── dev-resources
+├── figwheel&#95;server.log
+├── project.clj
+├── README.md
+├── resources
+│   └── public
+├── src
+│   ├── clj
+│   └── cljs
+├── target
+│   ├── classes
+│   ├── figwheel&#95;temp
+│   └── stale
+└── test
+    └── cljs
+</code></pre><h2><a name="modeling&#95;state"></a>Modeling State</h2>The following concepts are needed to properly model the Snake Game:<ul><li>Board<ul><li>width</li><li>height</li></ul></li><li>Snake<ul><li>position</li><li>direction</li></ul></li><li>Apple position</li><li>Points</li><li>Is the game over?</li></ul><h3><a name="board"></a>Board</h3>The board is defined by a number of rows and columns.  simplest way to express it is to use a tuple of 2 elements <code>&#91;width height&#93;</code>.<pre><code>&#40;defn init-board &#91;&#93; &#91;35 25&#93;&#41;
+</code></pre><h3><a name="snake"></a>Snake</h3>The snake is modeled with a direction in <code>#{:up :down :right :left}</code> and a sequence of positions <code>&#91;&#91;x1 y1&#93; &#91;x2 y2&#93;&#93;</code>.<pre><code>&#40;defn init-snake &#91;&#93;
+  {:direction :right
+   :body &#91;&#91;3 2&#93; &#91;2 2&#93; &#91;1 2&#93; &#91;0 2&#93;&#93;}&#41;
+</code></pre><h3><a name="state"></a>State</h3>The game state is the combination of all the above<pre><code>&#40;defn rand-free-position &#91;board unavailable-positions&#93;
+  &#40;-&gt;&gt; board
+       positions
+       &#40;remove &#40;set unavailable-positions&#41;&#41;
+       rand-nth&#41;&#41;
+
+&#40;defn init-state &#91;&#93;
+  &#40;let &#91;snake &#40;init-snake&#41;
+        board &#40;init-board&#41;&#93;
+    {:running? true
+     :board board
+     :snake snake
+     :food &#40;rand-free-position board &#40;:body snake&#41;&#41;
+     :points 0}&#41;&#41;
+</code></pre><h2><a name="the&#95;views"></a>The views</h2>Reagent is a simple wrapper around React. We need to design our views as pure functions of the app-state. Re-frame achieves this by using FRP and subscribing to state changes.<h3><a name="score"></a>Score</h3>The view function is very simple. It subscribes to the points value in the app-state.<pre><code>&#40;defn score &#91;&#93;
+  &#40;let &#91;points &#40;subscribe &#91;:points&#93;&#41;&#93;
+    &#91;:div.score &quot;Score: &quot; @points&#93;&#41;&#41;
+</code></pre><p>And here is how a subscription gets registered:</p><pre><code>&#40;register-sub :points &#40;fn &#91;db&#93; &#40;reaction &#40;:points @db&#41;&#41;&#41;&#41;
+</code></pre><h3><a name="board"></a>Board</h3>This view will be created with simple html elements. Canvas could have been used for that instead. Here, each cell of the board is a table cell with a given CSS class.<pre><code>&#40;defn board &#91;&#93;
+  &#40;let &#91;board &#40;subscribe &#91;:board&#93;&#41;
+        snake &#40;subscribe &#91;:snake&#93;&#41;
+        food &#40;subscribe &#91;:food&#93;&#41;&#93;
+    &#40;fn &#91;&#93;
+      &#40;let &#91;&#91;width height&#93; @board
+            {:keys &#91;body&#93;} @snake&#93;
+        &#40;into &#91;:table.stage&#93;
+              &#40;for &#91;y &#40;range height&#41;&#93;
+                &#40;into &#91;:tr {:key y}&#93;
+                      &#40;mapv &#40;fn &#91;x&#93; &#91;:td {:key &#40;str x &quot;.&quot; y&#41;
+                                          :class &#40;cell-class &#91;x y&#93; @food &#40;set body&#41;&#41;}&#93;&#41;
+                            &#40;range width&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;&#41;
+
+&#40;defn &#94;:private cell-class &#91;position food-position snake-body-positions&#93;
+  &#40;cond
+    &#40;= position food-position&#41;          &quot;food&quot;
+    &#40;get snake-body-positions position&#41; &quot;snake&quot;
+    :else                               &quot;empty&quot;&#41;&#41;
+</code></pre><h3><a name="game&#95;over"></a>Game Over</h3>When the game is over, an overlay is added on top of the board with a replay button.<pre><code>&#40;defn game-over &#91;&#93;
+  &#40;let &#91;running? &#40;subscribe &#91;:running?&#93;&#41;&#93;
+    &#40;fn &#91;&#93;
+      &#40;if @running?
+        &#91;:div&#93;
+        &#91;:div.overlay
+         &#91;:div.play {:on-click #&#40;dispatch &#91;:start-game&#93;&#41;}
+          &#91;:h1 &quot;↺&quot;&#93;&#93;&#93;&#41;&#41;&#41;&#41;
+</code></pre><h3><a name="game"></a>Game</h3>The main view is then composed of the different components.<pre><code>&#40;defn game &#91;&#93;
+  &#91;:div.game
+   &#91;score&#93;
+   &#91;board&#93;
+   &#91;game-over&#93;&#93;&#41;
+</code></pre>The components are then mounted to the DOM with the function <code>run</code> defined below.The main entrypoint of an re-frame app is the <code>init</code> function.<pre><code>&#40;defn run &#91;&#93;
+  &#40;reagent/render &#91;views/game&#93;
+                  &#40;.getElementById js/document &quot;app&quot;&#41;&#41;&#41;
+
+&#40;defn &#94;:export init &#91;&#93;
+  &#40;run&#41;&#41;
+</code></pre><h2><a name="game&#95;loop"></a>Game Loop</h2>The game loop is handled with a set-interval call that will create a new game state based on the current one. That state will then be handled by React (Reagent) and the view will get updated.<pre><code>&#40;defonce snake-moving
+   &#40;js/setInterval #&#40;dispatch &#91;:next-state&#93;&#41; 100&#41;&#41;
+</code></pre>Every 100ms, the message :next-state is sent to the handler.<h2><a name="handlers"></a>Handlers</h2><h3><a name="game&#95;initialization"></a>Game Initialization</h3>In order to initialize the game, a handler <code>:start-game</code> is created. It resets the initial state.<pre><code>&#40;register-handler :start-game &#40;fn  &#91;&#95; &#95;&#93; &#40;db/init-state&#41;&#41;&#41;
+</code></pre>And the <code>init</code> function is updated accordingly.<pre><code>&#40;defn &#94;:export init &#91;&#93;
+  &#40;dispatch-sync &#91;:start-game&#93;&#41;
+  &#40;run&#41;&#41;
+</code></pre><h3><a name="changing&#95;direction"></a>Changing Direction</h3>When a player interacts with the keyboard (Up, Down, Left, Right or h, j, k, l for vim users), the direction of the snake should get updated.<pre><code>&#40;register-handler
+   :change-direction
+   &#40;fn &#91;db &#91;&#95; direction&#93;&#93;
+      &#40;assert &#40;get #{:up :down :left :right} direction&#41;&#41;
+      &#40;assoc-in db &#91;:snake :direction&#93; direction&#41;&#41;&#41;
+</code></pre>A handler is just a reducer function that takes in the value of the app-state <code>db</code> and an action and returns a new app-state.Then, a keyboard listener is defined to catch the keystrokes mentioned above.<pre><code>&#40;def key-code-&gt;move
+   &quot;Mapping from the integer key code to the direction keyword&quot;
+   {38  :up   ; Up Arrow
+    75  :up   ; k
+    40  :down ; Down Arrow
+    74  :down ; j
+    39  :right ; Right Arrow
+    76  :right ; l
+    37  :left  ; Left Arrow
+    72  :left  ; h
+    }&#41;
+
+&#40;defonce key-handler
+   &#40;events/listen
+      js/window
+      &quot;keydown&quot;
+      &#40;fn  &#91;e&#93;
+         &#40;let &#91;key-code &#40;.-keyCode e&#41;&#93;
+            &#40;when &#40;contains? key-code-&gt;move key-code&#41;
+               &#40;re-frame/dispatch &#91;:change-direction &#40;key-code-&gt;move key-code&#41;&#93;&#41;&#41;&#41;&#41;&#41;&#41;
+
+</code></pre><h3><a name="next&#95;state"></a>Next State</h3>The last thing to do is to implement the handler next-state that will move the snake given the direction and the state of the game.<h4><a name="collisions"></a>Collisions</h4>The game is lost when the snake hits a wall or eats itself.<pre><code>&#40;defn collision? &#91;snake board&#93;
+    &#40;or &#40;wall? next-head board&#41; &#40;eat-itself? snake&#41;&#41;&#41;
+
+&#40;defn eat-itself? &#91;{:keys &#91;body&#93; :as snake}&#93;
+  &#40;boolean &#40;get &#40;into #{} body&#41; &#40;next-head-position snake&#41;&#41;&#41;&#41;
+
+&#40;defn valid? &#91;&#91;x y :as position&#93; &#91;width height :as board&#93;&#93;
+  &#40;and &#40;&lt; -1 x width&#41; &#40;&lt; -1 y height&#41;&#41;&#41;
+
+&#40;def wall? &#40;complement valid?&#41;&#41;
+</code></pre><pre><code>&#40;re-frame/register-handler
+   :next-state
+   &#40;fn &#91;db &#95;&#93;
+      &#40;let &#91;{:keys &#91;snake food board running?&#93;} db&#93;
+         &#40;cond
+            &#40;db/collision? snake board&#41; &#40;assoc db :running? false&#41;
+            &#40;db/food? &#40;db/next-head-position snake&#41; food&#41; &#40;-&gt; db
+                                                              &#40;update :points inc&#41;
+                                                              &#40;update :snake db/move-snake&#41;
+                                                              &#40;dissoc :food&#41;
+                                                              &#40;update :snake db/grow-snake snake&#41;
+                                                              &#40;db/rand-food&#41;&#41;
+            :else &#40;update db :snake db/move-snake&#41;&#41;&#41;&#41;&#41;
+</code></pre>Here is the implementation of <code>move-snake</code><pre><code>&#40;defn next-head-position
+  &#91;{:keys &#91;body direction&#93; :as snake}&#93;
+  &#40;let &#91;&#91;x y :as pos&#93; &#40;first body&#41;&#93;
+    &#40;case direction
+      :left  &#91;&#40;dec x&#41; y&#93;
+      :right &#91;&#40;inc x&#41; y&#93;
+      :up    &#91;x &#40;dec y&#41;&#93;
+      :down  &#91;x &#40;inc y&#41;&#93;&#41;&#41;&#41;
+
+&#40;defn move-snake
+  &#91;{:keys &#91;body direction&#93; :as snake}&#93;
+  &#40;update snake :body &#40;fn &#91;body&#93; &#40;cons &#40;next-head-position snake&#41;
+                                       &#40;drop-last body&#41;&#41;&#41;&#41;&#41;
+</code></pre>Here is the implementation of <code>grow-snake</code><pre><code>&#40;defn grow-snake
+  &#91;snake previous-snake&#93;
+  &#40;update snake :body concat &#91;&#40;last &#40;:body previous-snake&#41;&#41;&#93;&#41;&#41;
+</code></pre>And finally, here is <code>rand-food</code><pre><code>&#40;defn rand-food &#91;{:keys &#91;snake board&#93; :as state}&#93;
+  &#40;assoc state :food &#40;rand-free-position board &#40;:body snake&#41;&#41;&#41;&#41;
+</code></pre><h2><a name="development&#95;environment"></a>Development Environment</h2>Something that is often not discussed is tooling. Tools are everything. I spent a lot of time fine tuning my environment to increase my productiviy.To be honest, the ecosystem and tooling around Clojure and ClojureScript are just amazing.<h3><a name="figwheel"></a>Figwheel</h3>To develop this game I used <a href='https://github.com/bhauman/lein-figwheel'>figwheel</a> which enables live pushes to the clients. Here is a <a href='https://www.youtube.com/watch?v=KZjFVdU8VLI'>quick demo</a> of interactive development in ClojureScript.<p>This is what my workflow looks like when developing:</p><ul><li>Type something in my text-editor</li><li>Save changes</li><li>See live changes in the browser<ul><li>live code reloading</li><li>live CSS reloading</li></ul></li><li>Repeat until done</li></ul><p>I get instant feedback without leaving my text editor!</p><p><img src="/posts/img/snake/liveupdate.png" alt="Dev Environment" title="Figwheel and Interactive Development" /></p><h2><a name="the&#95;end"></a>The End</h2>Re-frame is a well thought out combination of <strong>reactive programming</strong>, <strong>functional programming</strong> and <strong>immutable data</strong>.<p>It lets developers focus on the core application in a beautifully simple way. Re-frame emerged from ideas developed in Om, Elm and Flux that we are going to study next.</p><h3><a name="pros"></a>Pros</h3><ul><li>Clojure ❤<ul><li>Immutability</li><li>Lisp</li></ul></li><li>Local states are just atoms captured in a closure. Local states can be shared between components.</li><li>Reagent is faster than React: All the checks for changes are pointer comparison (thanks to Clojure's immutability)</li><li>Pure functions: the side effects are pushed to the system's boundary. They should only exist in the event handlers.</li><li>Composition via reactive data flows (unidirectional graph)</li><li>Extremely simple (200 lines of code to implement re-frame)</li><li>Decomplects view, state, business logic in a functional way<h3><a name="cons"></a>Cons</h3></li><li>The views are only in Hiccup Style for now (Clojure Data Structure). That is hard for designers to create their own components...</li></ul>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/Reagent.html">Reagent</a>
+    
+    <a href="/tags/React.html">React</a>
+    
+    <a href="/tags/ClojureScript.html">ClojureScript</a>
+    
+    <a href="/tags/Functional Programming.html">Functional Programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+    </div>
+
+    
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//letsachouffe.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    
+
+
+</div>
+
+            </div>
+        </div>
+    </div>
+    <footer>
+        <a class="media" href="https://github.com/chouffe">
+            <img src="/img/github.png" title="Github"/>
+        </a>
+        <a class="media" href="https://www.linkedin.com/in/arthur-caillau-06879961" title="Linkedin">
+            <img src="/img/linkedin.png" />
+        </a>
+        <a class="media" href="/feed.xml" title="RSS">
+            <img src="/img/rss.png" />
+        </a>
+        <!-- Copyright &copy;  Arthur Caillau -->
+        <!-- <p style="text-align: center;">Powered by <a href="http://cryogenweb.org">Cryogen</a></p> -->
+    </footer>
+</div>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+
