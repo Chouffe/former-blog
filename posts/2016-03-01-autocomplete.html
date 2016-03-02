@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>λambda Closure: Autocomplete - Trie Datastructure in Clojure and ClojureScript</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Alegreya:400italic,700italic,400,700' rel='stylesheet'
+          type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index.html">λambda Closure</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li ><a href="/index.html">Home</a></li>
+                <li
+                ><a href="/archives.html">Archives</a></li>
+                
+                <li
+                >
+                <a href="/pages/about.html">About</a>
+                </li>
+                
+                <!-- <li><a href="/feed.xml">RSS</a></li> -->
+                <!-- <li class="dropdown"> -->
+                <!--     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> -->
+                <!--         More <span class="caret"></span></a> -->
+                <!--     <ul class="dropdown-menu" role="menu"> -->
+                <!--         <1!-- <li class="dropdown-header">Links</li> --1> -->
+                <!--         <1!-- <li><a href="http://cryogenweb.org/docs/home.html">Cryogen Docs</a></li> --1> -->
+                <!--         <1!-- <li><a href="http://carmenla.me/blog/index.html">Carmen's Blog</a></li> --1> -->
+                <!--         <1!--  --1> -->
+
+                <!--         <1!--  --1> -->
+                <!--         <1!-- <li class="divider"></li> --1> -->
+                <!--         <li class="dropdown-header">Recent Posts</li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-03-01-autocomplete.html">Autocomplete - Trie Datastructure in Clojure and ClojureScript</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li> -->
+                <!--          -->
+                <!--          -->
+
+                <!--          -->
+                <!--         <li class="divider"></li> -->
+                <!--         <li class="dropdown-header">Tags</li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Reagent.html">Reagent</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Re-frame.html">Re-frame</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/React.html">React</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/ClojureScript.html">ClojureScript</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Data Structures.html">Data Structures</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Functional Programming.html">Functional Programming</a></li> -->
+                <!--          -->
+                <!--          -->
+                <!--     </ul> -->
+                <!-- </li> -->
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div><!--/.container-fluid -->
+</nav>
+
+
+<div id="sidebar">
+    <h2>Recent Posts</h2>
+    <ul>
+        
+        <li><a href="/posts/2016-03-01-autocomplete.html">Autocomplete - Trie Datastructure in Clojure and ClojureScript</a></li>
+        
+        <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li>
+        
+    </ul>
+
+    <h2>Tags</h2>
+    <ul>
+        
+        <li><a href="/tags/Reagent.html">Reagent</a></li>
+        
+        <li><a href="/tags/Re-frame.html">Re-frame</a></li>
+        
+        <li><a href="/tags/React.html">React</a></li>
+        
+        <li><a href="/tags/ClojureScript.html">ClojureScript</a></li>
+        
+        <li><a href="/tags/Data Structures.html">Data Structures</a></li>
+        
+        <li><a href="/tags/Functional Programming.html">Functional Programming</a></li>
+        
+    </ul>
+</div>
+
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content">
+                
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-12" id="date">March 1, 2016</div>
+        
+    </div>
+    <h2>Autocomplete - Trie Datastructure in Clojure and ClojureScript</h2>
+</div>
+<div>
+    <ol class="content"><li><a href="#introduction">Introduction</a></li><li><a href="#trie">Trie</a></li><li><a href="#demo">Demo</a></li><li><a href="#implementation">Implementation</a></li><ol><li><a href="#datastructure">Datastructure</a></li><li><a href="#operations">Operations</a></li><ol><li><a href="#conj_-_adding_to_a_trie">Conj - Adding to a trie</a></li></ol><li><a href="#search">Search</a></li><ol><li><a href="#apply-trie">apply-trie</a></li><li><a href="#trie-&gt;seq">trie->seq</a></li></ol><li><a href="#protocols_and_interfaces">Protocols and Interfaces</a></li><ol><li><a href="#rationale">Rationale</a></li><li><a href="#implementation">Implementation</a></li></ol></ol><li><a href="#autocomplete_system_and_ui">Autocomplete System and UI</a></li><ol><li><a href="#introduction">Introduction</a></li><li><a href="#implementation">Implementation</a></li></ol></ol>
+    <h2><a name="introduction"></a>Introduction</h2><p>A <a href='https://en.wikipedia.org/wiki/Trie'>trie</a> is a powerful datastructure often used for dictionary representation. The goal of this post is to implement a trie in Clojure and ClojureScript. Then we will build an autocomplete system.</p><h2><a name="trie"></a>Trie</h2><ul><li>A trie or prefix tree (as they can be searched by prefixes) is an ordered datastructure that is used to store an associative array where the keys are ususally strings.</li><li>All the descendants of a node have a common prefix of the string associated with that node.</li><li>The root node is the empty string<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Trie_example.svg/600px-Trie_example.svg.png" alt="Trie Datastructure" /></li><li>A prefix tree allows for quick search, insert and delete operations O(log k) where k is the length of the prefix string</li></ul><h2><a name="demo"></a>Demo</h2><p><link href="/posts/css/autocomplete.css" rel="stylesheet" type="text/css"> <div id="autocomplete-app"></div> <script src="/posts/js/autocomplete.js"></script> <script>autocomplete.core.init();</script></p><ul><li>The left input field allows you to add strings in the trie</li><li>the right input field performs autocompletes</li><li>The trie is represented as nested list for visualization</li><li>Some preset lists of strings can be loaded by clicking on the buttons <code>Reset</code>, <code>Small Alphabet</code>, <code>Countries</code> or <code>Languages</code>.</li><li>The colors of the elements in the trie change if they match the prefix-string</li></ul><h2><a name="implementation"></a>Implementation</h2><p>You can find my trie implementation on <a href='https://github.com/Chouffe/clj-trie'>github</a> and <a href='https://clojars.org/trie'>clojars</a>.</p><h3><a name="datastructure"></a>Datastructure</h3><p>Each node of the trie will contain the following keys:</p><ul><li><strong>value</strong>: the current prefix string at that node, eg "te", "in"...</li><li><strong>children</strong>: a hashmap from char to node</li><li><strong>key</strong>: flag to say if the value of that node is in the dictionary</li></ul><p>The empty trie is then<pre><code>&#40;defn- make-empty-trie
+  &quot;Creates an empty trie with empty lexicon.&quot;
+  &#91;&#93;
+  {:value &quot;&quot;}&#41;
+ </code></pre></p><h3><a name="operations"></a>Operations</h3><h4><a name="conj&#95;-&#95;adding&#95;to&#95;a&#95;trie"></a>Conj - Adding to a trie</h4>When adding a string to a trie, we need to perform the following:<ul><li>Go down the tree following the characters of the string</li><li>Create nodes (if they do not exist yet) unitl the last character of the string is reached</li><li>Add/Update the node with a flag to say that this word (path from root to the node) has been added to the trie</li></ul><pre><code>&#40;defn- conj-trie
+  &#91;{:keys &#91;value children&#93; :as trie} &#91;c &amp; cs :as string&#93;&#93;
+  &#40;let &#91;ch &#40;str c&#41;&#93;
+    &#40;cond
+      ; A leaf is reached and last letter in string
+      &#40;and &#40;not &#40;get children ch&#41;&#41; &#40;not &#40;seq cs&#41;&#41;&#41;
+      &#40;assoc-in trie &#91;:children &#40;str c&#41;&#93; {:value &#40;str value c&#41; :key &#40;gensym&#41;}&#41;
+
+      ; A leaf is reached and still some letters
+      &#40;and &#40;not &#40;get children ch&#41;&#41; &#40;seq cs&#41;&#41;
+      &#40;assoc-in trie &#91;:children ch&#93; &#40;conj-trie {:value &#40;str value c&#41;} cs&#41;&#41;
+
+      ; No more letters but already present in the trie
+      &#40;and &#40;get children ch&#41; &#40;not &#40;seq cs&#41;&#41;&#41;
+      &#40;assoc-in trie &#91;:children ch :key&#93; &#40;gensym&#41;&#41;
+
+      ; Already in trie and still letters
+      &#40;and &#40;get children ch&#41; &#40;seq cs&#41;&#41;
+      &#40;update-in trie &#91;:children ch&#93; conj-trie cs&#41;&#41;&#41;&#41;
+</code></pre><p>Then adding a set of strings is just a fold over the collection</p><pre><code>&#40;defn- into-trie
+  &#91;trie coll&#93;
+  &#40;reduce conj-trie trie coll&#41;&#41;
+</code></pre><p>Here is the Clojure Datastructure that represents the trie<pre><code>{:value &quot;&quot;,
+ :children
+ {&quot;t&quot;
+  {:value &quot;t&quot;,
+   :children
+   {&quot;e&quot;
+    {:value &quot;te&quot;,
+     :children
+     {&quot;a&quot; {:value &quot;tea&quot;, :key G&#95;&#95;22475},
+      &quot;d&quot; {:value &quot;ted&quot;, :key G&#95;&#95;22477},
+      &quot;n&quot; {:value &quot;ten&quot;, :key G&#95;&#95;22478}}},
+    &quot;o&quot; {:value &quot;to&quot;, :key G&#95;&#95;22476}}},
+  &quot;a&quot; {:value &quot;a&quot;, :key G&#95;&#95;22479},
+  &quot;i&quot;
+  {:value &quot;i&quot;,
+   :key G&#95;&#95;22480,
+   :children
+   {&quot;n&quot;
+    {:value &quot;in&quot;,
+     :key G&#95;&#95;22481,
+     :children {&quot;n&quot; {:value &quot;inn&quot;, :key G&#95;&#95;22482}}}}}}}
+ </code></pre><h3><a name="search"></a>Search</h3>To search into the trie (autocomplete given a prefix string), we only need to go down the trie following the prefix string characters and then collect the elements in this subtree.<h4><a name="apply-trie"></a>apply-trie</h4></p><p>The <code>apply-trie</code> function goes down the trie following the characters and then call the funtion <code>trie-&gt;seq</code> on this subtree.</p><pre><code>&#40;defn- apply-trie
+  &#91;{:keys &#91;value key children&#93; :as trie} &#91;c &amp; cs :as string&#93;&#93;
+  &#40;cond
+    &#40;not &#40;seq string&#41;&#41;           &#40;trie-&gt;seq trie&#41;
+    &#40;not &#40;get children &#40;str c&#41;&#41;&#41; &#91;&#93;
+    :else                        &#40;recur &#40;get children &#40;str c&#41;&#41; cs&#41;&#41;&#41;
+</code></pre><h4><a name="trie->seq"></a>trie->seq</h4>This function is just a DFS on the given trie and returns the element in order.<pre><code>&#40;defn- trie-&gt;seq
+  &quot;Returns all the elements inserted in trie as a sequence.&quot;
+  &#91;{:keys &#91;value children key&#93; :as trie}&#93;
+  &#40;loop &#91;stack &#91;trie&#93;
+         words &#91;&#93;&#93;
+    &#40;if &#40;not &#40;seq stack&#41;&#41;
+      &#40;seq words&#41;
+      &#40;let &#91;{:keys &#91;value children key&#93;} &#40;peek stack&#41;&#93;
+        &#40;recur &#40;into &#40;pop stack&#41; &#40;vals children&#41;&#41;
+               &#40;if key &#40;conj words value&#41; words&#41;&#41;&#41;&#41;&#41;&#41;
+</code></pre><h3><a name="protocols&#95;and&#95;interfaces"></a>Protocols and Interfaces</h3><h4><a name="rationale"></a>Rationale</h4>To make it feel like a built-in clojure Datastructure, we can define a Trie type that will implement some common clojure interfaces<ul><li>IPersistentCollection</li><li>ILookup</li><li>IFn</li></ul><p>The goal is to be able to do the following</p><pre><code>;; Creating a trie
+&#40;def autocomplete &#40;trie &#91;&quot;doo&quot; &quot;foo&quot; &quot;bar&quot; &quot;baz&quot;&#93;&#41;&#41;
+
+;; Autocomplete given a prefix-string
+&#40;autocomplete &quot;ba&quot;&#41; =&gt; &#91;&quot;bar&quot; &quot;baz&quot;&#93;
+
+;; Adding to the trie
+&#40;&#40;conj autocomplete &quot;baf&quot;&#41; &quot;ba&quot;&#41; =&gt; &#91;&quot;baf&quot; &quot;bar&quot; &quot;baz&quot;&#93;
+</code></pre><h4><a name="implementation"></a>Implementation</h4>Clojure implementation<pre><code>&#40;deftype Trie &#91;trie lexicon-set&#93;
+
+      clojure.lang.ILookup
+      &#40;valAt &#91;self prefix-string&#93; &#40;get lexicon-set prefix-string&#41;&#41;
+      &#40;valAt &#91;self prefix-string default&#93; &#40;get lexicon-set prefix-string default&#41;&#41;
+
+      clojure.lang.IPersistentCollection
+      &#40;seq &#91;self&#93;     &#40;seq lexicon-set&#41;&#41;
+      &#40;cons &#91;self o&#93;  &#40;Trie. &#40;conj-trie trie o&#41; &#40;conj lexicon-set o&#41;&#41;&#41;
+      &#40;empty &#91;self&#93;   &#40;Trie. &#40;make-empty-trie&#41; #{}&#41;&#41;
+      &#40;equiv &#91;self o&#93; &#40;and &#40;instance? Trie o&#41; &#40;= trie &#40;.trie o&#41;&#41;&#41;&#41;
+
+      clojure.lang.IFn
+      &#40;invoke &#91;self prefix-string&#93;
+        &#40;let &#91;completions &#40;apply-trie trie prefix-string&#41;&#93;
+          &#40;if &#40;seq completions&#41; completions nil&#41;&#41;&#41;
+
+      Object
+      &#40;toString &#91;self&#93; &#40;str trie&#41;&#41;&#41;
+</code></pre><p>ClojureScript implementation</p><pre><code>&#40;deftype Trie &#91;trie lexicon-set&#93;
+
+      cljs.core/ILookup
+      &#40;-lookup &#91;self prefix-string&#93; &#40;get lexicon-set prefix-string&#41;&#41;
+      &#40;-lookup &#91;self prefix-string default&#93; &#40;get lexicon-set prefix-string default&#41;&#41;
+
+      cljs.core/ICollection
+      &#40;-conj &#91;self o&#93; &#40;Trie. &#40;conj-trie trie o&#41; &#40;conj lexicon-set o&#41;&#41;&#41;
+
+      cljs.core/ICounted
+      &#40;-count &#91;self&#93; &#40;count lexicon-set&#41;&#41;
+
+      cljs.core/IEmptyableCollection
+      &#40;-empty &#91;self&#93; &#40;Trie. &#40;make-empty-trie&#41; #{}&#41;&#41;
+
+      cljs.core/IFn
+      &#40;-invoke &#91;self prefix-string&#93;
+        &#40;let &#91;completions &#40;apply-trie trie prefix-string&#41;&#93;
+          &#40;if &#40;seq completions&#41; completions nil&#41;&#41;&#41;
+
+      Object
+      &#40;toString &#91;self&#93; &#40;str trie&#41;&#41;&#41;
+</code></pre><p>Then the use of conditional readers and .cljc files allow us to make our trie work for Clojure and ClojureScript</p><pre><code>
+#?&#40;:clj
+    &#40;deftype Trie &#91;trie lexicon-set&#93;
+
+      clojure.lang.ILookup
+      &#40;valAt &#91;self prefix-string&#93; &#40;get lexicon-set prefix-string&#41;&#41;
+      &#40;valAt &#91;self prefix-string default&#93; &#40;get lexicon-set prefix-string default&#41;&#41;
+
+      clojure.lang.IPersistentCollection
+      &#40;seq &#91;self&#93;     &#40;seq lexicon-set&#41;&#41;
+      &#40;cons &#91;self o&#93;  &#40;Trie. &#40;conj-trie trie o&#41; &#40;conj lexicon-set o&#41;&#41;&#41;
+      &#40;empty &#91;self&#93;   &#40;Trie. &#40;make-empty-trie&#41; #{}&#41;&#41;
+      &#40;equiv &#91;self o&#93; &#40;and &#40;instance? Trie o&#41; &#40;= trie &#40;.trie o&#41;&#41;&#41;&#41;
+
+      clojure.lang.IFn
+      &#40;invoke &#91;self prefix-string&#93;
+        &#40;let &#91;completions &#40;apply-trie trie prefix-string&#41;&#93;
+          &#40;if &#40;seq completions&#41; completions nil&#41;&#41;&#41;
+
+      Object
+      &#40;toString &#91;self&#93; &#40;str trie&#41;&#41;&#41;&#41;
+
+#?&#40;:cljs
+    &#40;deftype Trie &#91;trie lexicon-set&#93;
+
+      cljs.core/ILookup
+      &#40;-lookup &#91;self prefix-string&#93; &#40;get lexicon-set prefix-string&#41;&#41;
+      &#40;-lookup &#91;self prefix-string default&#93; &#40;get lexicon-set prefix-string default&#41;&#41;
+
+      cljs.core/ICollection
+      &#40;-conj &#91;self o&#93; &#40;Trie. &#40;conj-trie trie o&#41; &#40;conj lexicon-set o&#41;&#41;&#41;
+
+      cljs.core/ICounted
+      &#40;-count &#91;self&#93; &#40;count lexicon-set&#41;&#41;
+
+      cljs.core/IEmptyableCollection
+      &#40;-empty &#91;self&#93; &#40;Trie. &#40;make-empty-trie&#41; #{}&#41;&#41;
+
+      cljs.core/IFn
+      &#40;-invoke &#91;self prefix-string&#93;
+        &#40;let &#91;completions &#40;apply-trie trie prefix-string&#41;&#93;
+          &#40;if &#40;seq completions&#41; completions nil&#41;&#41;&#41;
+
+      Object
+      &#40;toString &#91;self&#93; &#40;str trie&#41;&#41;&#41;&#41;
+</code></pre><p>Finally, the main factory function is the <code>trie</code> function</p><pre><code>&#40;defn trie
+  &#40;&#91;&#93;     &#40;Trie. &#40;make-empty-trie&#41; #{}&#41;&#41;
+  &#40;&#91;coll&#93; &#40;into &#40;trie&#41; &#40;set &#40;map s/lower-case coll&#41;&#41;&#41;&#41;&#41;
+</code></pre><h2><a name="autocomplete&#95;system&#95;and&#95;ui"></a>Autocomplete System and UI</h2><h3><a name="introduction"></a>Introduction</h3><p>I wanted to build a small <a href='#demo'>UI interface</a> for my trie datastructure. The hard part was the trie visualization. I decided to use nested unordered lists to replicate the tree structure of the trie. I am still not sure convinced that is the best way to visualize a trie but it is good enough for the scope of this project.</p><h3><a name="implementation"></a>Implementation</h3><ul><li>ClojureScript</li><li>re-frame (React + Reagent)</li><li>trie library developed before</li><li>Bootstrap for CSS style</li></ul><p>Actually, it took me more time to build the UI than to build and deploy the trie datastructure. It is hard to come up with good and simple UI components to help the reader understand how this datastructure works.</p><p>It is also on my <a href='https://github.com/Chouffe/autocomplete'>github</a> if you want to take a look at the code :)</p>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/Reagent.html">Reagent</a>
+    
+    <a href="/tags/Re-frame.html">Re-frame</a>
+    
+    <a href="/tags/React.html">React</a>
+    
+    <a href="/tags/ClojureScript.html">ClojureScript</a>
+    
+    <a href="/tags/Data Structures.html">Data Structures</a>
+    
+    <a href="/tags/Functional Programming.html">Functional Programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            </div>
+        </div>
+    </div>
+    <footer>
+        <a class="media" href="https://github.com/chouffe">
+            <img src="/img/github.png" title="Github"/>
+        </a>
+        <a class="media" href="https://www.linkedin.com/in/arthur-caillau-06879961" title="Linkedin">
+            <img src="/img/linkedin.png" />
+        </a>
+        <a class="media" href="/feed.xml" title="RSS">
+            <img src="/img/rss.png" />
+        </a>
+        <!-- Copyright &copy;  Arthur Caillau -->
+        <!-- <p style="text-align: center;">Powered by <a href="http://cryogenweb.org">Cryogen</a></p> -->
+        <div id="snake"></div>
+    </footer>
+</div>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

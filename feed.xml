@@ -12,11 +12,191 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Tue, 01 Mar 2016 10:59:01 -0800
+Wed, 02 Mar 2016 12:20:28 -0800
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+http://simplelambda.com/posts/2016-03-01-autocomplete.html
+</guid>
+<link>
+http://simplelambda.com/posts/2016-03-01-autocomplete.html
+</link>
+<title>
+Autocomplete - Trie Datastructure in Clojure and ClojureScript
+</title>
+<description>
+&lt;h2&gt;&lt;a name=&quot;introduction&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;&lt;p&gt;A &lt;a href='https://en.wikipedia.org/wiki/Trie'&gt;trie&lt;/a&gt; is a powerful datastructure often used for dictionary representation. The goal of this post is to implement a trie in Clojure and ClojureScript. Then we will build an autocomplete system.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;trie&quot;&gt;&lt;/a&gt;Trie&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;A trie or prefix tree (as they can be searched by prefixes) is an ordered datastructure that is used to store an associative array where the keys are ususally strings.&lt;/li&gt;&lt;li&gt;All the descendants of a node have a common prefix of the string associated with that node.&lt;/li&gt;&lt;li&gt;The root node is the empty string&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Trie_example.svg/600px-Trie_example.svg.png&quot; alt=&quot;Trie Datastructure&quot; /&gt;&lt;/li&gt;&lt;li&gt;A prefix tree allows for quick search, insert and delete operations O(log k) where k is the length of the prefix string&lt;/li&gt;&lt;/ul&gt;&lt;h2&gt;&lt;a name=&quot;demo&quot;&gt;&lt;/a&gt;Demo&lt;/h2&gt;&lt;p&gt;&lt;link href=&quot;/posts/css/autocomplete.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt; &lt;div id=&quot;autocomplete-app&quot;&gt;&lt;/div&gt; &lt;script src=&quot;/posts/js/autocomplete.js&quot;&gt;&lt;/script&gt; &lt;script&gt;autocomplete.core.init();&lt;/script&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;The left input field allows you to add strings in the trie&lt;/li&gt;&lt;li&gt;the right input field performs autocompletes&lt;/li&gt;&lt;li&gt;The trie is represented as nested list for visualization&lt;/li&gt;&lt;li&gt;Some preset lists of strings can be loaded by clicking on the buttons &lt;code&gt;Reset&lt;/code&gt;, &lt;code&gt;Small Alphabet&lt;/code&gt;, &lt;code&gt;Countries&lt;/code&gt; or &lt;code&gt;Languages&lt;/code&gt;.&lt;/li&gt;&lt;li&gt;The colors of the elements in the trie change if they match the prefix-string&lt;/li&gt;&lt;/ul&gt;&lt;h2&gt;&lt;a name=&quot;implementation&quot;&gt;&lt;/a&gt;Implementation&lt;/h2&gt;&lt;p&gt;You can find my trie implementation on &lt;a href='https://github.com/Chouffe/clj-trie'&gt;github&lt;/a&gt; and &lt;a href='https://clojars.org/trie'&gt;clojars&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;datastructure&quot;&gt;&lt;/a&gt;Datastructure&lt;/h3&gt;&lt;p&gt;Each node of the trie will contain the following keys:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;value&lt;/strong&gt;: the current prefix string at that node, eg &quot;te&quot;, &quot;in&quot;...&lt;/li&gt;&lt;li&gt;&lt;strong&gt;children&lt;/strong&gt;: a hashmap from char to node&lt;/li&gt;&lt;li&gt;&lt;strong&gt;key&lt;/strong&gt;: flag to say if the value of that node is in the dictionary&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;The empty trie is then&lt;pre&gt;&lt;code&gt;&amp;#40;defn- make-empty-trie
+  &amp;quot;Creates an empty trie with empty lexicon.&amp;quot;
+  &amp;#91;&amp;#93;
+  {:value &amp;quot;&amp;quot;}&amp;#41;
+ &lt;/code&gt;&lt;/pre&gt;&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;operations&quot;&gt;&lt;/a&gt;Operations&lt;/h3&gt;&lt;h4&gt;&lt;a name=&quot;conj&amp;#95;-&amp;#95;adding&amp;#95;to&amp;#95;a&amp;#95;trie&quot;&gt;&lt;/a&gt;Conj - Adding to a trie&lt;/h4&gt;When adding a string to a trie, we need to perform the following:&lt;ul&gt;&lt;li&gt;Go down the tree following the characters of the string&lt;/li&gt;&lt;li&gt;Create nodes (if they do not exist yet) unitl the last character of the string is reached&lt;/li&gt;&lt;li&gt;Add/Update the node with a flag to say that this word (path from root to the node) has been added to the trie&lt;/li&gt;&lt;/ul&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn- conj-trie
+  &amp;#91;{:keys &amp;#91;value children&amp;#93; :as trie} &amp;#91;c &amp;amp; cs :as string&amp;#93;&amp;#93;
+  &amp;#40;let &amp;#91;ch &amp;#40;str c&amp;#41;&amp;#93;
+    &amp;#40;cond
+      ; A leaf is reached and last letter in string
+      &amp;#40;and &amp;#40;not &amp;#40;get children ch&amp;#41;&amp;#41; &amp;#40;not &amp;#40;seq cs&amp;#41;&amp;#41;&amp;#41;
+      &amp;#40;assoc-in trie &amp;#91;:children &amp;#40;str c&amp;#41;&amp;#93; {:value &amp;#40;str value c&amp;#41; :key &amp;#40;gensym&amp;#41;}&amp;#41;
+
+      ; A leaf is reached and still some letters
+      &amp;#40;and &amp;#40;not &amp;#40;get children ch&amp;#41;&amp;#41; &amp;#40;seq cs&amp;#41;&amp;#41;
+      &amp;#40;assoc-in trie &amp;#91;:children ch&amp;#93; &amp;#40;conj-trie {:value &amp;#40;str value c&amp;#41;} cs&amp;#41;&amp;#41;
+
+      ; No more letters but already present in the trie
+      &amp;#40;and &amp;#40;get children ch&amp;#41; &amp;#40;not &amp;#40;seq cs&amp;#41;&amp;#41;&amp;#41;
+      &amp;#40;assoc-in trie &amp;#91;:children ch :key&amp;#93; &amp;#40;gensym&amp;#41;&amp;#41;
+
+      ; Already in trie and still letters
+      &amp;#40;and &amp;#40;get children ch&amp;#41; &amp;#40;seq cs&amp;#41;&amp;#41;
+      &amp;#40;update-in trie &amp;#91;:children ch&amp;#93; conj-trie cs&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then adding a set of strings is just a fold over the collection&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn- into-trie
+  &amp;#91;trie coll&amp;#93;
+  &amp;#40;reduce conj-trie trie coll&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Here is the Clojure Datastructure that represents the trie&lt;pre&gt;&lt;code&gt;{:value &amp;quot;&amp;quot;,
+ :children
+ {&amp;quot;t&amp;quot;
+  {:value &amp;quot;t&amp;quot;,
+   :children
+   {&amp;quot;e&amp;quot;
+    {:value &amp;quot;te&amp;quot;,
+     :children
+     {&amp;quot;a&amp;quot; {:value &amp;quot;tea&amp;quot;, :key G&amp;#95;&amp;#95;22475},
+      &amp;quot;d&amp;quot; {:value &amp;quot;ted&amp;quot;, :key G&amp;#95;&amp;#95;22477},
+      &amp;quot;n&amp;quot; {:value &amp;quot;ten&amp;quot;, :key G&amp;#95;&amp;#95;22478}}},
+    &amp;quot;o&amp;quot; {:value &amp;quot;to&amp;quot;, :key G&amp;#95;&amp;#95;22476}}},
+  &amp;quot;a&amp;quot; {:value &amp;quot;a&amp;quot;, :key G&amp;#95;&amp;#95;22479},
+  &amp;quot;i&amp;quot;
+  {:value &amp;quot;i&amp;quot;,
+   :key G&amp;#95;&amp;#95;22480,
+   :children
+   {&amp;quot;n&amp;quot;
+    {:value &amp;quot;in&amp;quot;,
+     :key G&amp;#95;&amp;#95;22481,
+     :children {&amp;quot;n&amp;quot; {:value &amp;quot;inn&amp;quot;, :key G&amp;#95;&amp;#95;22482}}}}}}}
+ &lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;search&quot;&gt;&lt;/a&gt;Search&lt;/h3&gt;To search into the trie (autocomplete given a prefix string), we only need to go down the trie following the prefix string characters and then collect the elements in this subtree.&lt;h4&gt;&lt;a name=&quot;apply-trie&quot;&gt;&lt;/a&gt;apply-trie&lt;/h4&gt;&lt;/p&gt;&lt;p&gt;The &lt;code&gt;apply-trie&lt;/code&gt; function goes down the trie following the characters and then call the funtion &lt;code&gt;trie-&amp;gt;seq&lt;/code&gt; on this subtree.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn- apply-trie
+  &amp;#91;{:keys &amp;#91;value key children&amp;#93; :as trie} &amp;#91;c &amp;amp; cs :as string&amp;#93;&amp;#93;
+  &amp;#40;cond
+    &amp;#40;not &amp;#40;seq string&amp;#41;&amp;#41;           &amp;#40;trie-&amp;gt;seq trie&amp;#41;
+    &amp;#40;not &amp;#40;get children &amp;#40;str c&amp;#41;&amp;#41;&amp;#41; &amp;#91;&amp;#93;
+    :else                        &amp;#40;recur &amp;#40;get children &amp;#40;str c&amp;#41;&amp;#41; cs&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h4&gt;&lt;a name=&quot;trie-&gt;seq&quot;&gt;&lt;/a&gt;trie-&gt;seq&lt;/h4&gt;This function is just a DFS on the given trie and returns the element in order.&lt;pre&gt;&lt;code&gt;&amp;#40;defn- trie-&amp;gt;seq
+  &amp;quot;Returns all the elements inserted in trie as a sequence.&amp;quot;
+  &amp;#91;{:keys &amp;#91;value children key&amp;#93; :as trie}&amp;#93;
+  &amp;#40;loop &amp;#91;stack &amp;#91;trie&amp;#93;
+         words &amp;#91;&amp;#93;&amp;#93;
+    &amp;#40;if &amp;#40;not &amp;#40;seq stack&amp;#41;&amp;#41;
+      &amp;#40;seq words&amp;#41;
+      &amp;#40;let &amp;#91;{:keys &amp;#91;value children key&amp;#93;} &amp;#40;peek stack&amp;#41;&amp;#93;
+        &amp;#40;recur &amp;#40;into &amp;#40;pop stack&amp;#41; &amp;#40;vals children&amp;#41;&amp;#41;
+               &amp;#40;if key &amp;#40;conj words value&amp;#41; words&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;protocols&amp;#95;and&amp;#95;interfaces&quot;&gt;&lt;/a&gt;Protocols and Interfaces&lt;/h3&gt;&lt;h4&gt;&lt;a name=&quot;rationale&quot;&gt;&lt;/a&gt;Rationale&lt;/h4&gt;To make it feel like a built-in clojure Datastructure, we can define a Trie type that will implement some common clojure interfaces&lt;ul&gt;&lt;li&gt;IPersistentCollection&lt;/li&gt;&lt;li&gt;ILookup&lt;/li&gt;&lt;li&gt;IFn&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;The goal is to be able to do the following&lt;/p&gt;&lt;pre&gt;&lt;code&gt;;; Creating a trie
+&amp;#40;def autocomplete &amp;#40;trie &amp;#91;&amp;quot;doo&amp;quot; &amp;quot;foo&amp;quot; &amp;quot;bar&amp;quot; &amp;quot;baz&amp;quot;&amp;#93;&amp;#41;&amp;#41;
+
+;; Autocomplete given a prefix-string
+&amp;#40;autocomplete &amp;quot;ba&amp;quot;&amp;#41; =&amp;gt; &amp;#91;&amp;quot;bar&amp;quot; &amp;quot;baz&amp;quot;&amp;#93;
+
+;; Adding to the trie
+&amp;#40;&amp;#40;conj autocomplete &amp;quot;baf&amp;quot;&amp;#41; &amp;quot;ba&amp;quot;&amp;#41; =&amp;gt; &amp;#91;&amp;quot;baf&amp;quot; &amp;quot;bar&amp;quot; &amp;quot;baz&amp;quot;&amp;#93;
+&lt;/code&gt;&lt;/pre&gt;&lt;h4&gt;&lt;a name=&quot;implementation&quot;&gt;&lt;/a&gt;Implementation&lt;/h4&gt;Clojure implementation&lt;pre&gt;&lt;code&gt;&amp;#40;deftype Trie &amp;#91;trie lexicon-set&amp;#93;
+
+      clojure.lang.ILookup
+      &amp;#40;valAt &amp;#91;self prefix-string&amp;#93; &amp;#40;get lexicon-set prefix-string&amp;#41;&amp;#41;
+      &amp;#40;valAt &amp;#91;self prefix-string default&amp;#93; &amp;#40;get lexicon-set prefix-string default&amp;#41;&amp;#41;
+
+      clojure.lang.IPersistentCollection
+      &amp;#40;seq &amp;#91;self&amp;#93;     &amp;#40;seq lexicon-set&amp;#41;&amp;#41;
+      &amp;#40;cons &amp;#91;self o&amp;#93;  &amp;#40;Trie. &amp;#40;conj-trie trie o&amp;#41; &amp;#40;conj lexicon-set o&amp;#41;&amp;#41;&amp;#41;
+      &amp;#40;empty &amp;#91;self&amp;#93;   &amp;#40;Trie. &amp;#40;make-empty-trie&amp;#41; #{}&amp;#41;&amp;#41;
+      &amp;#40;equiv &amp;#91;self o&amp;#93; &amp;#40;and &amp;#40;instance? Trie o&amp;#41; &amp;#40;= trie &amp;#40;.trie o&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+      clojure.lang.IFn
+      &amp;#40;invoke &amp;#91;self prefix-string&amp;#93;
+        &amp;#40;let &amp;#91;completions &amp;#40;apply-trie trie prefix-string&amp;#41;&amp;#93;
+          &amp;#40;if &amp;#40;seq completions&amp;#41; completions nil&amp;#41;&amp;#41;&amp;#41;
+
+      Object
+      &amp;#40;toString &amp;#91;self&amp;#93; &amp;#40;str trie&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;ClojureScript implementation&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;deftype Trie &amp;#91;trie lexicon-set&amp;#93;
+
+      cljs.core/ILookup
+      &amp;#40;-lookup &amp;#91;self prefix-string&amp;#93; &amp;#40;get lexicon-set prefix-string&amp;#41;&amp;#41;
+      &amp;#40;-lookup &amp;#91;self prefix-string default&amp;#93; &amp;#40;get lexicon-set prefix-string default&amp;#41;&amp;#41;
+
+      cljs.core/ICollection
+      &amp;#40;-conj &amp;#91;self o&amp;#93; &amp;#40;Trie. &amp;#40;conj-trie trie o&amp;#41; &amp;#40;conj lexicon-set o&amp;#41;&amp;#41;&amp;#41;
+
+      cljs.core/ICounted
+      &amp;#40;-count &amp;#91;self&amp;#93; &amp;#40;count lexicon-set&amp;#41;&amp;#41;
+
+      cljs.core/IEmptyableCollection
+      &amp;#40;-empty &amp;#91;self&amp;#93; &amp;#40;Trie. &amp;#40;make-empty-trie&amp;#41; #{}&amp;#41;&amp;#41;
+
+      cljs.core/IFn
+      &amp;#40;-invoke &amp;#91;self prefix-string&amp;#93;
+        &amp;#40;let &amp;#91;completions &amp;#40;apply-trie trie prefix-string&amp;#41;&amp;#93;
+          &amp;#40;if &amp;#40;seq completions&amp;#41; completions nil&amp;#41;&amp;#41;&amp;#41;
+
+      Object
+      &amp;#40;toString &amp;#91;self&amp;#93; &amp;#40;str trie&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then the use of conditional readers and .cljc files allow us to make our trie work for Clojure and ClojureScript&lt;/p&gt;&lt;pre&gt;&lt;code&gt;
+#?&amp;#40;:clj
+    &amp;#40;deftype Trie &amp;#91;trie lexicon-set&amp;#93;
+
+      clojure.lang.ILookup
+      &amp;#40;valAt &amp;#91;self prefix-string&amp;#93; &amp;#40;get lexicon-set prefix-string&amp;#41;&amp;#41;
+      &amp;#40;valAt &amp;#91;self prefix-string default&amp;#93; &amp;#40;get lexicon-set prefix-string default&amp;#41;&amp;#41;
+
+      clojure.lang.IPersistentCollection
+      &amp;#40;seq &amp;#91;self&amp;#93;     &amp;#40;seq lexicon-set&amp;#41;&amp;#41;
+      &amp;#40;cons &amp;#91;self o&amp;#93;  &amp;#40;Trie. &amp;#40;conj-trie trie o&amp;#41; &amp;#40;conj lexicon-set o&amp;#41;&amp;#41;&amp;#41;
+      &amp;#40;empty &amp;#91;self&amp;#93;   &amp;#40;Trie. &amp;#40;make-empty-trie&amp;#41; #{}&amp;#41;&amp;#41;
+      &amp;#40;equiv &amp;#91;self o&amp;#93; &amp;#40;and &amp;#40;instance? Trie o&amp;#41; &amp;#40;= trie &amp;#40;.trie o&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+      clojure.lang.IFn
+      &amp;#40;invoke &amp;#91;self prefix-string&amp;#93;
+        &amp;#40;let &amp;#91;completions &amp;#40;apply-trie trie prefix-string&amp;#41;&amp;#93;
+          &amp;#40;if &amp;#40;seq completions&amp;#41; completions nil&amp;#41;&amp;#41;&amp;#41;
+
+      Object
+      &amp;#40;toString &amp;#91;self&amp;#93; &amp;#40;str trie&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+#?&amp;#40;:cljs
+    &amp;#40;deftype Trie &amp;#91;trie lexicon-set&amp;#93;
+
+      cljs.core/ILookup
+      &amp;#40;-lookup &amp;#91;self prefix-string&amp;#93; &amp;#40;get lexicon-set prefix-string&amp;#41;&amp;#41;
+      &amp;#40;-lookup &amp;#91;self prefix-string default&amp;#93; &amp;#40;get lexicon-set prefix-string default&amp;#41;&amp;#41;
+
+      cljs.core/ICollection
+      &amp;#40;-conj &amp;#91;self o&amp;#93; &amp;#40;Trie. &amp;#40;conj-trie trie o&amp;#41; &amp;#40;conj lexicon-set o&amp;#41;&amp;#41;&amp;#41;
+
+      cljs.core/ICounted
+      &amp;#40;-count &amp;#91;self&amp;#93; &amp;#40;count lexicon-set&amp;#41;&amp;#41;
+
+      cljs.core/IEmptyableCollection
+      &amp;#40;-empty &amp;#91;self&amp;#93; &amp;#40;Trie. &amp;#40;make-empty-trie&amp;#41; #{}&amp;#41;&amp;#41;
+
+      cljs.core/IFn
+      &amp;#40;-invoke &amp;#91;self prefix-string&amp;#93;
+        &amp;#40;let &amp;#91;completions &amp;#40;apply-trie trie prefix-string&amp;#41;&amp;#93;
+          &amp;#40;if &amp;#40;seq completions&amp;#41; completions nil&amp;#41;&amp;#41;&amp;#41;
+
+      Object
+      &amp;#40;toString &amp;#91;self&amp;#93; &amp;#40;str trie&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Finally, the main factory function is the &lt;code&gt;trie&lt;/code&gt; function&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn trie
+  &amp;#40;&amp;#91;&amp;#93;     &amp;#40;Trie. &amp;#40;make-empty-trie&amp;#41; #{}&amp;#41;&amp;#41;
+  &amp;#40;&amp;#91;coll&amp;#93; &amp;#40;into &amp;#40;trie&amp;#41; &amp;#40;set &amp;#40;map s/lower-case coll&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;autocomplete&amp;#95;system&amp;#95;and&amp;#95;ui&quot;&gt;&lt;/a&gt;Autocomplete System and UI&lt;/h2&gt;&lt;h3&gt;&lt;a name=&quot;introduction&quot;&gt;&lt;/a&gt;Introduction&lt;/h3&gt;&lt;p&gt;I wanted to build a small &lt;a href='#demo'&gt;UI interface&lt;/a&gt; for my trie datastructure. The hard part was the trie visualization. I decided to use nested unordered lists to replicate the tree structure of the trie. I am still not sure convinced that is the best way to visualize a trie but it is good enough for the scope of this project.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;implementation&quot;&gt;&lt;/a&gt;Implementation&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;ClojureScript&lt;/li&gt;&lt;li&gt;re-frame (React + Reagent)&lt;/li&gt;&lt;li&gt;trie library developed before&lt;/li&gt;&lt;li&gt;Bootstrap for CSS style&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Actually, it took me more time to build the UI than to build and deploy the trie datastructure. It is hard to come up with good and simple UI components to help the reader understand how this datastructure works.&lt;/p&gt;&lt;p&gt;It is also on my &lt;a href='https://github.com/Chouffe/autocomplete'&gt;github&lt;/a&gt; if you want to take a look at the code :)&lt;/p&gt;
+</description>
+<enclosure>
+
+</enclosure>
+<pubDate>
+Tue, 01 Mar 2016 00:00:00 -0800
+</pubDate>
+</item>
 <item>
 <guid>
 http://simplelambda.com/posts/2016-02-29-snake-clojurescript-reagent.html
