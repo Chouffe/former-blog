@@ -12,7 +12,7 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Fri, 04 Mar 2016 09:24:55 -0800
+Fri, 04 Mar 2016 09:31:15 -0800
 </lastBuildDate>
 <generator>
 clj-rss
@@ -70,7 +70,7 @@ Fractals - Exploration of the Mandelbrot Set with ClojureScript and React
         x range-x&amp;#93;
     &amp;#40;let &amp;#91;&amp;#91;in-set? k&amp;#93; &amp;#40;mandelbrot-n-iter &amp;#40;c/z x y&amp;#41;&amp;#41;&amp;#93;
       &amp;#40;if in-set? 0 k&amp;#41;&amp;#41;&amp;#41;&amp;#41;
-&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;demo&quot;&gt;&lt;/a&gt;Demo&lt;/h2&gt;&lt;p&gt;I built a simple visualization tool with ClojureScript, React, re-frame and the mandelbrot functions discussed above. The colors can be changed by sliding the ranges, zooming is enabled and clicking on the fractal moves it accordingly.&lt;/p&gt;&lt;p&gt;&lt;link href=&quot;/posts/css/mandelbrot.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt; &lt;div id=&quot;mandelbrot&quot;&gt;&lt;/div&gt; &lt;script src=&quot;/posts/js/mandelbrot.js&quot;&gt;&lt;/script&gt; &lt;script&gt;mandelbrot.core.init();&lt;/script&gt;&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;end&quot;&gt;&lt;/a&gt;The End&lt;/h2&gt;&lt;p&gt;The Mandelbrot Set is a very simple yet sophisticated mathematical object that derives from very simple rules. I'd like to generate other fractal objects (Julia, Sierpinski Gasket) in a next project.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;demo&quot;&gt;&lt;/a&gt;Demo&lt;/h2&gt;&lt;p&gt;I built a simple visualization tool with ClojureScript, React, re-frame and the mandelbrot functions discussed above. The colors can be changed by sliding the ranges, zooming is enabled and clicking on the fractal moves it accordingly.&lt;/p&gt;&lt;p&gt;&lt;link href=&quot;/posts/css/mandelbrot.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt; &lt;div id=&quot;mandelbrot&quot;&gt;&lt;/div&gt; &lt;script src=&quot;/posts/js/mandelbrot.js&quot;&gt;&lt;/script&gt; &lt;script&gt;mandelbrot.core.init();&lt;/script&gt;&lt;/p&gt;&lt;p&gt;The code is fully available on &lt;a href='https://github.com/Chouffe/fractals'&gt;my github&lt;/a&gt;. Feel free to explore the code and explore your own fractal objects.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;end&quot;&gt;&lt;/a&gt;The End&lt;/h2&gt;&lt;p&gt;The Mandelbrot Set is a very simple yet sophisticated mathematical object that derives from very simple rules. I'd like to generate other fractal objects (Julia, Sierpinski Gasket) in a next project.&lt;/p&gt;
 </description>
 <enclosure>
 
