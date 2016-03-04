@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>λambda Closure: Fractals - Exploration of the Mandelbrot Set with ClojureScript and React</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Alegreya:400italic,700italic,400,700' rel='stylesheet'
+          type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index.html">λambda Closure</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li ><a href="/index.html">Home</a></li>
+                <li
+                ><a href="/archives.html">Archives</a></li>
+                
+                <li
+                >
+                <a href="/pages/about.html">About</a>
+                </li>
+                
+                <!-- <li><a href="/feed.xml">RSS</a></li> -->
+                <!-- <li class="dropdown"> -->
+                <!--     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> -->
+                <!--         More <span class="caret"></span></a> -->
+                <!--     <ul class="dropdown-menu" role="menu"> -->
+                <!--         <1!-- <li class="dropdown-header">Links</li> --1> -->
+                <!--         <1!-- <li><a href="http://cryogenweb.org/docs/home.html">Cryogen Docs</a></li> --1> -->
+                <!--         <1!-- <li><a href="http://carmenla.me/blog/index.html">Carmen's Blog</a></li> --1> -->
+                <!--         <1!--  --1> -->
+
+                <!--         <1!--  --1> -->
+                <!--         <1!-- <li class="divider"></li> --1> -->
+                <!--         <li class="dropdown-header">Recent Posts</li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-03-03-mandelbrot-set.html">Fractals - Exploration of the Mandelbrot Set with ClojureScript and React</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-03-01-autocomplete.html">Autocomplete - Trie Datastructure in Clojure and ClojureScript</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li> -->
+                <!--          -->
+                <!--          -->
+
+                <!--          -->
+                <!--         <li class="divider"></li> -->
+                <!--         <li class="dropdown-header">Tags</li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Reagent.html">Reagent</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Re-frame.html">Re-frame</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Math.html">Math</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/React.html">React</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Fractals.html">Fractals</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/ClojureScript.html">ClojureScript</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Functional Programming.html">Functional Programming</a></li> -->
+                <!--          -->
+                <!--         <li><a href="/tags/Data Structures.html">Data Structures</a></li> -->
+                <!--          -->
+                <!--          -->
+                <!--     </ul> -->
+                <!-- </li> -->
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div><!--/.container-fluid -->
+</nav>
+
+
+<div id="sidebar">
+    <h2>Recent Posts</h2>
+    <ul>
+        
+        <li><a href="/posts/2016-03-03-mandelbrot-set.html">Fractals - Exploration of the Mandelbrot Set with ClojureScript and React</a></li>
+        
+        <li><a href="/posts/2016-03-01-autocomplete.html">Autocomplete - Trie Datastructure in Clojure and ClojureScript</a></li>
+        
+        <li><a href="/posts/2016-02-29-snake-clojurescript-reagent.html">Snake the game - A Functional Programming Style tutorial for ClojureScript and Reagent</a></li>
+        
+    </ul>
+
+    <h2>Tags</h2>
+    <ul>
+        
+        <li><a href="/tags/Reagent.html">Reagent</a></li>
+        
+        <li><a href="/tags/Re-frame.html">Re-frame</a></li>
+        
+        <li><a href="/tags/Math.html">Math</a></li>
+        
+        <li><a href="/tags/React.html">React</a></li>
+        
+        <li><a href="/tags/Fractals.html">Fractals</a></li>
+        
+        <li><a href="/tags/ClojureScript.html">ClojureScript</a></li>
+        
+        <li><a href="/tags/Functional Programming.html">Functional Programming</a></li>
+        
+        <li><a href="/tags/Data Structures.html">Data Structures</a></li>
+        
+    </ul>
+</div>
+
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="content">
+                
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-12" id="date">March 3, 2016</div>
+        
+    </div>
+    <h2>Fractals - Exploration of the Mandelbrot Set with ClojureScript and React</h2>
+</div>
+<div>
+    <ol class="content"><li><a href="#introduction">Introduction</a></li><li><a href="#mandelbrot_set">Mandelbrot Set</a></li><li><a href="#modeling_complex_numbers">Modeling complex numbers</a></li><li><a href="#set_generation">Set generation</a></li><li><a href="#demo">Demo</a></li><li><a href="#the_end">The End</a></li></ol>
+    <h2><a name="introduction"></a>Introduction</h2><p>A fractal is a mathematical object that exhibits a pattern that repeats itself at every scale. They are very interesting mathematical concepts because they differ from regular geometrical figures. How does one measure the length a fractal curve? The Mandelbrot Set is a closed area of the complex plane but still, its perimeter is not a finite number. Sophisticated structures arise from very simple rules!</p><p><img src="https://upload.wikimedia.org/wikipedia/commons/2/21/Mandel_zoom_00_mandelbrot_set.jpg" alt="Mandelbrot Set" /></p><p>The goal of this post is to see how we can build a simple UI tool to visualize the Mandelbrot Set.</p><p><img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Mandelbrot_zoom.gif" alt="Mandelbrot Repeating Pattern" /></p><h2><a name="mandelbrot&#95;set"></a>Mandelbrot Set</h2><p>The <strong>Mandelbrot Set</strong> is the set of complex numbers such that the function f(z) = z<sup>2</sup> + c does not diverge when iterated.</p><p>A practical test is often to iterate n times and to check whether the value remains bouded (eg. < 2)</p><ul><li>f(z)</li><li>f(f(z))</li><li>f(f(f(z))) ...</li></ul><p>This fractal is particularly interesting because it is one of the best-known examples of mathematical visualization or mathematical art. It has also some real world applications in complex dynamics.</p><h2><a name="modeling&#95;complex&#95;numbers"></a>Modeling complex numbers</h2><p>The Mandelbrot Set is a subset of the Complex plane. We need a way to represent <a href='https://en.wikipedia.org/wiki/Complex_number'>complex numbers</a> in Clojure. As a reminder, complex numbers are numbers that can be expressed in the form a + b<em>i</em> where a and b are real numbers and <em>i</em> is the imaginary unit.</p><p>I will not get really fancy implementing the complex operations required to generate the Mandelbrot Set. I may implement a robust library for complex numbers in the future but for now, we will just go with 3 operations:</p><ul><li>add: adds two complex numbers</li><li>mult: multiplies two complex numbers</li><li>abs: norm of a complex number</li></ul><p>Also, there are two common ways to represent complex numbers. The first one is a tuple of imaginary part (Im) and real part (Re). The second one uses the distance from O (origin in the Complex plane) and the angle of OP and the x-axis (which is known as the argument of the complex number). Sometimes, operations can be performed more efficiently in one representation or the other. For now, I will only provide one representation for the complex numbers:</p><pre><code>&#40;ns mandelbrot.complex&#41;
+
+&#40;defn z &#91;x y&#93; &#91;x y&#93;&#41;
+
+&#40;defn add &#91;z1 z2&#93;
+  &#40;let &#91;&#91;x1 y1&#93; z1
+        &#91;x2 y2&#93; z2&#93;
+    &#91;&#40;+ x1 x2&#41; &#40;+ y1 y2&#41;&#93;&#41;&#41;
+
+&#40;defn mult &#91;z1 z2&#93;
+  &#40;let &#91;&#91;x1 y1&#93; z1
+        &#91;x2 y2&#93; z2&#93;
+    &#91;&#40;- &#40;&#42; x1 x2&#41;
+        &#40;&#42; y1 y2&#41;&#41;
+     &#40;+ &#40;&#42; y1 x2&#41;
+        &#40;&#42; y2 x1&#41;&#41;&#93;&#41;&#41;
+
+&#40;defn abs &#91;z&#93;
+  &#40;let &#91;&#91;x y&#93; z&#93;
+    &#40;#?&#40;:clj Math/sqrt :cljs js/Math.sqrt&#41; &#40;+ &#40;&#42; x x&#41; &#40;&#42; y y&#41;&#41;&#41;&#41;&#41;
+</code></pre><h2><a name="set&#95;generation"></a>Set generation</h2><p>We only need a function <code>mandelbrot?</code> that takes in a complex number <code>z</code> and returns a boolean. <code>z</code> is in the set if and only if it does not diverge when repeatedly applying the function f.</p><p>f(u) = u<sup>2</sup> + z</p><pre><code>&#40;defn mandelbrot? &#91;z&#93;
+  &#40;let &#91;max-iter 20&#93;
+    &#40;loop &#91;k 1
+           m &#40;iterate #&#40;c/add z &#40;c/mult % %&#41;&#41; &#40;c/z 0 0&#41;&#41;&#93;
+      &#40;if &#40;and &#40;&gt; max-iter k&#41; &#40;&lt; &#40;c/abs &#40;first m&#41;&#41; 2&#41;&#41;
+        &#40;recur &#40;inc k&#41; &#40;rest m&#41;&#41;
+        &#40;= max-iter k&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>We can already generate the mandelbrot set with this <code>mandelbrot?</code> function. In order to make it look nicer, we can return the number of iterations needed to see that it diverges. We will then be able to display a gradient of colors instead of only 2 colors.</p><pre><code>&#40;defn &#94;:private mandelbrot-n-iter-aux
+  &#91;z u n-max k&#93;
+  &#40;cond
+    &#40;&gt; &#40;c/abs u&#41; 2&#41; &#91;false k&#93;
+    &#40;&gt;= k n-max&#41; &#91;true k&#93;
+    :else &#40;recur z &#40;c/add z &#40;c/mult u u&#41;&#41; n-max &#40;inc k&#41;&#41;&#41;&#41;
+
+&#40;defn &#94;:private mandelbrot-n-iter &#91;z&#93;
+  &#40;mandelbrot-n-iter-aux z &#40;c/z 0 0&#41; 20 1&#41;&#41;
+
+&#40;defn &#94;:private mandelbrot-value &#91;range-x range-y&#93;
+  &#40;for &#91;y range-y
+        x range-x&#93;
+    &#40;let &#91;&#91;in-set? k&#93; &#40;mandelbrot-n-iter &#40;c/z x y&#41;&#41;&#93;
+      &#40;if in-set? 0 k&#41;&#41;&#41;&#41;
+</code></pre><h2><a name="demo"></a>Demo</h2><p>I built a simple visualization tool with ClojureScript, React, re-frame and the mandelbrot functions discussed above. The colors can be changed by sliding the ranges, zooming is enabled and clicking on the fractal moves it accordingly.</p><p><link href="/posts/css/mandelbrot.css" rel="stylesheet" type="text/css"> <div id="mandelbrot"></div> <script src="/posts/js/mandelbrot.js"></script> <script>mandelbrot.core.init();</script></p><h2><a name="the&#95;end"></a>The End</h2><p>The Mandelbrot Set is a very simple yet sophisticated mathematical object that derives from very simple rules. I'd like to generate other fractal objects (Julia, Sierpinski Gasket) in a next project.</p>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/Reagent.html">Reagent</a>
+    
+    <a href="/tags/Re-frame.html">Re-frame</a>
+    
+    <a href="/tags/Math.html">Math</a>
+    
+    <a href="/tags/React.html">React</a>
+    
+    <a href="/tags/Fractals.html">Fractals</a>
+    
+    <a href="/tags/ClojureScript.html">ClojureScript</a>
+    
+    <a href="/tags/Functional Programming.html">Functional Programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2016-03-01-autocomplete.html">Autocomplete - Trie Datastructure in Clojure and ClojureScript &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            </div>
+        </div>
+    </div>
+    <footer>
+        <a class="media" href="https://github.com/chouffe">
+            <img src="/img/github.png" title="Github"/>
+        </a>
+        <a class="media" href="https://www.linkedin.com/in/arthur-caillau-06879961" title="Linkedin">
+            <img src="/img/linkedin.png" />
+        </a>
+        <a class="media" href="/feed.xml" title="RSS">
+            <img src="/img/rss.png" />
+        </a>
+        <!-- Copyright &copy;  Arthur Caillau -->
+        <!-- <p style="text-align: center;">Powered by <a href="http://cryogenweb.org">Cryogen</a></p> -->
+        <div id="snake"></div>
+    </footer>
+</div>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

@@ -12,11 +12,73 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Wed, 02 Mar 2016 12:20:28 -0800
+Fri, 04 Mar 2016 09:24:55 -0800
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+http://simplelambda.com/posts/2016-03-03-mandelbrot-set.html
+</guid>
+<link>
+http://simplelambda.com/posts/2016-03-03-mandelbrot-set.html
+</link>
+<title>
+Fractals - Exploration of the Mandelbrot Set with ClojureScript and React
+</title>
+<description>
+&lt;h2&gt;&lt;a name=&quot;introduction&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;&lt;p&gt;A fractal is a mathematical object that exhibits a pattern that repeats itself at every scale. They are very interesting mathematical concepts because they differ from regular geometrical figures. How does one measure the length a fractal curve? The Mandelbrot Set is a closed area of the complex plane but still, its perimeter is not a finite number. Sophisticated structures arise from very simple rules!&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/2/21/Mandel_zoom_00_mandelbrot_set.jpg&quot; alt=&quot;Mandelbrot Set&quot; /&gt;&lt;/p&gt;&lt;p&gt;The goal of this post is to see how we can build a simple UI tool to visualize the Mandelbrot Set.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/c/ce/Mandelbrot_zoom.gif&quot; alt=&quot;Mandelbrot Repeating Pattern&quot; /&gt;&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;mandelbrot&amp;#95;set&quot;&gt;&lt;/a&gt;Mandelbrot Set&lt;/h2&gt;&lt;p&gt;The &lt;strong&gt;Mandelbrot Set&lt;/strong&gt; is the set of complex numbers such that the function f(z) = z&lt;sup&gt;2&lt;/sup&gt; + c does not diverge when iterated.&lt;/p&gt;&lt;p&gt;A practical test is often to iterate n times and to check whether the value remains bouded (eg. &lt; 2)&lt;/p&gt;&lt;ul&gt;&lt;li&gt;f(z)&lt;/li&gt;&lt;li&gt;f(f(z))&lt;/li&gt;&lt;li&gt;f(f(f(z))) ...&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;This fractal is particularly interesting because it is one of the best-known examples of mathematical visualization or mathematical art. It has also some real world applications in complex dynamics.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;modeling&amp;#95;complex&amp;#95;numbers&quot;&gt;&lt;/a&gt;Modeling complex numbers&lt;/h2&gt;&lt;p&gt;The Mandelbrot Set is a subset of the Complex plane. We need a way to represent &lt;a href='https://en.wikipedia.org/wiki/Complex_number'&gt;complex numbers&lt;/a&gt; in Clojure. As a reminder, complex numbers are numbers that can be expressed in the form a + b&lt;em&gt;i&lt;/em&gt; where a and b are real numbers and &lt;em&gt;i&lt;/em&gt; is the imaginary unit.&lt;/p&gt;&lt;p&gt;I will not get really fancy implementing the complex operations required to generate the Mandelbrot Set. I may implement a robust library for complex numbers in the future but for now, we will just go with 3 operations:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;add: adds two complex numbers&lt;/li&gt;&lt;li&gt;mult: multiplies two complex numbers&lt;/li&gt;&lt;li&gt;abs: norm of a complex number&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Also, there are two common ways to represent complex numbers. The first one is a tuple of imaginary part (Im) and real part (Re). The second one uses the distance from O (origin in the Complex plane) and the angle of OP and the x-axis (which is known as the argument of the complex number). Sometimes, operations can be performed more efficiently in one representation or the other. For now, I will only provide one representation for the complex numbers:&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;ns mandelbrot.complex&amp;#41;
+
+&amp;#40;defn z &amp;#91;x y&amp;#93; &amp;#91;x y&amp;#93;&amp;#41;
+
+&amp;#40;defn add &amp;#91;z1 z2&amp;#93;
+  &amp;#40;let &amp;#91;&amp;#91;x1 y1&amp;#93; z1
+        &amp;#91;x2 y2&amp;#93; z2&amp;#93;
+    &amp;#91;&amp;#40;+ x1 x2&amp;#41; &amp;#40;+ y1 y2&amp;#41;&amp;#93;&amp;#41;&amp;#41;
+
+&amp;#40;defn mult &amp;#91;z1 z2&amp;#93;
+  &amp;#40;let &amp;#91;&amp;#91;x1 y1&amp;#93; z1
+        &amp;#91;x2 y2&amp;#93; z2&amp;#93;
+    &amp;#91;&amp;#40;- &amp;#40;&amp;#42; x1 x2&amp;#41;
+        &amp;#40;&amp;#42; y1 y2&amp;#41;&amp;#41;
+     &amp;#40;+ &amp;#40;&amp;#42; y1 x2&amp;#41;
+        &amp;#40;&amp;#42; y2 x1&amp;#41;&amp;#41;&amp;#93;&amp;#41;&amp;#41;
+
+&amp;#40;defn abs &amp;#91;z&amp;#93;
+  &amp;#40;let &amp;#91;&amp;#91;x y&amp;#93; z&amp;#93;
+    &amp;#40;#?&amp;#40;:clj Math/sqrt :cljs js/Math.sqrt&amp;#41; &amp;#40;+ &amp;#40;&amp;#42; x x&amp;#41; &amp;#40;&amp;#42; y y&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;set&amp;#95;generation&quot;&gt;&lt;/a&gt;Set generation&lt;/h2&gt;&lt;p&gt;We only need a function &lt;code&gt;mandelbrot?&lt;/code&gt; that takes in a complex number &lt;code&gt;z&lt;/code&gt; and returns a boolean. &lt;code&gt;z&lt;/code&gt; is in the set if and only if it does not diverge when repeatedly applying the function f.&lt;/p&gt;&lt;p&gt;f(u) = u&lt;sup&gt;2&lt;/sup&gt; + z&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn mandelbrot? &amp;#91;z&amp;#93;
+  &amp;#40;let &amp;#91;max-iter 20&amp;#93;
+    &amp;#40;loop &amp;#91;k 1
+           m &amp;#40;iterate #&amp;#40;c/add z &amp;#40;c/mult % %&amp;#41;&amp;#41; &amp;#40;c/z 0 0&amp;#41;&amp;#41;&amp;#93;
+      &amp;#40;if &amp;#40;and &amp;#40;&amp;gt; max-iter k&amp;#41; &amp;#40;&amp;lt; &amp;#40;c/abs &amp;#40;first m&amp;#41;&amp;#41; 2&amp;#41;&amp;#41;
+        &amp;#40;recur &amp;#40;inc k&amp;#41; &amp;#40;rest m&amp;#41;&amp;#41;
+        &amp;#40;= max-iter k&amp;#41;&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;We can already generate the mandelbrot set with this &lt;code&gt;mandelbrot?&lt;/code&gt; function. In order to make it look nicer, we can return the number of iterations needed to see that it diverges. We will then be able to display a gradient of colors instead of only 2 colors.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;&amp;#40;defn &amp;#94;:private mandelbrot-n-iter-aux
+  &amp;#91;z u n-max k&amp;#93;
+  &amp;#40;cond
+    &amp;#40;&amp;gt; &amp;#40;c/abs u&amp;#41; 2&amp;#41; &amp;#91;false k&amp;#93;
+    &amp;#40;&amp;gt;= k n-max&amp;#41; &amp;#91;true k&amp;#93;
+    :else &amp;#40;recur z &amp;#40;c/add z &amp;#40;c/mult u u&amp;#41;&amp;#41; n-max &amp;#40;inc k&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+
+&amp;#40;defn &amp;#94;:private mandelbrot-n-iter &amp;#91;z&amp;#93;
+  &amp;#40;mandelbrot-n-iter-aux z &amp;#40;c/z 0 0&amp;#41; 20 1&amp;#41;&amp;#41;
+
+&amp;#40;defn &amp;#94;:private mandelbrot-value &amp;#91;range-x range-y&amp;#93;
+  &amp;#40;for &amp;#91;y range-y
+        x range-x&amp;#93;
+    &amp;#40;let &amp;#91;&amp;#91;in-set? k&amp;#93; &amp;#40;mandelbrot-n-iter &amp;#40;c/z x y&amp;#41;&amp;#41;&amp;#93;
+      &amp;#40;if in-set? 0 k&amp;#41;&amp;#41;&amp;#41;&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;demo&quot;&gt;&lt;/a&gt;Demo&lt;/h2&gt;&lt;p&gt;I built a simple visualization tool with ClojureScript, React, re-frame and the mandelbrot functions discussed above. The colors can be changed by sliding the ranges, zooming is enabled and clicking on the fractal moves it accordingly.&lt;/p&gt;&lt;p&gt;&lt;link href=&quot;/posts/css/mandelbrot.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt; &lt;div id=&quot;mandelbrot&quot;&gt;&lt;/div&gt; &lt;script src=&quot;/posts/js/mandelbrot.js&quot;&gt;&lt;/script&gt; &lt;script&gt;mandelbrot.core.init();&lt;/script&gt;&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;end&quot;&gt;&lt;/a&gt;The End&lt;/h2&gt;&lt;p&gt;The Mandelbrot Set is a very simple yet sophisticated mathematical object that derives from very simple rules. I'd like to generate other fractal objects (Julia, Sierpinski Gasket) in a next project.&lt;/p&gt;
+</description>
+<enclosure>
+
+</enclosure>
+<pubDate>
+Thu, 03 Mar 2016 00:00:00 -0800
+</pubDate>
+</item>
 <item>
 <guid>
 http://simplelambda.com/posts/2016-03-01-autocomplete.html
