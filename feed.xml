@@ -12,11 +12,195 @@ http://simplelambda.com
 This blog is awesome
 </description>
 <lastBuildDate>
-Fri, 04 Mar 2016 09:31:15 -0800
+Tue, 08 Mar 2016 21:50:41 -0800
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+http://simplelambda.com/posts/2016-03-08-elm-game-of-life.html
+</guid>
+<link>
+http://simplelambda.com/posts/2016-03-08-elm-game-of-life.html
+</link>
+<title>
+Elm - Conway's Game of Life - Functional Programming in the browser
+</title>
+<description>
+&lt;p&gt;This is the second post of my series describing functional programming abstraction in the browser. Elm is a relatively new programming language. Elm code compiles to JS, HTML and CSS. It embraces Reactive Programming in a Functional Programming mindset.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;elm&amp;#95;language&quot;&gt;&lt;/a&gt;Elm Language&lt;/h2&gt;&lt;p&gt;To be honest, I am pretty excited about Elm! It looks very promising. Elm's syntax is very close to Haskell's syntax. So if you happen to know Haskell you will start writing Elm code in no time.&lt;/p&gt;&lt;p&gt;Here is a list of core features that makes it interesting imo:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Purely Functional&lt;ul&gt;&lt;li&gt;Higher order functions&lt;/li&gt;&lt;li&gt;Currying&lt;/li&gt;&lt;li&gt;Laziness&lt;/li&gt;&lt;li&gt;Immutable Data Structures&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Small core language&lt;ul&gt;&lt;li&gt;The Elm core packages are very simple and small. A couple of hours only is needed to dive into it. Not as small as a lisp though but still very small.&lt;/li&gt;&lt;li&gt;The Elm source code is amazingly well writen (in Haskell). It is available on Github.&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Expressive language&lt;/li&gt;&lt;li&gt;Amazing Type System&lt;ul&gt;&lt;li&gt;Safety: No runtime exceptions&lt;/li&gt;&lt;li&gt;Algebraic Data Types&lt;/li&gt;&lt;li&gt;Parametricity&lt;/li&gt;&lt;li&gt;Hindley Milner&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;Reactive Programming&lt;/li&gt;&lt;/ul&gt;&lt;h2&gt;&lt;a name=&quot;elm&amp;#95;architecture&quot;&gt;&lt;/a&gt;Elm Architecture&lt;/h2&gt;&lt;p&gt;The Elm Architecture is a simple yet sophisticated pattern for writing infinitely nestable components. This is something anyone would like to have for modularity, code reuse and testing.&lt;/p&gt;&lt;p&gt;The architecture of an Elm program is the composition of 3 separated parts:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Model&lt;/strong&gt;: Data Structure (usually a combination of algebraic data types) that describes the state of the program&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Update&lt;/strong&gt;: Reducer functions from a model to a new model&lt;/li&gt;&lt;li&gt;&lt;strong&gt;View&lt;/strong&gt;: pure function of the model + event handlers&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;I tend to see it as a proper implementation of the MVC pattern that is commonly found in other frameworks. The business logic and data are completely separated from the view code.&lt;/p&gt;&lt;h2&gt;&lt;a name=&quot;conway's&amp;#95;game&amp;#95;of&amp;#95;life&quot;&gt;&lt;/a&gt;Conway's Game of Life&lt;/h2&gt;&lt;p&gt;I decided to code a little Elm program for Conway's Game of Life to get a better understanding of Elm. My code is available on &lt;a href='https://github.com/Chouffe/elm-game-of-life'&gt;github&lt;/a&gt; as always.&lt;/p&gt;&lt;p&gt;Let's first consider how it works&lt;/p&gt;&lt;ul&gt;&lt;li&gt;There is a board containing alive and dead cells&lt;/li&gt;&lt;li&gt;A particular cell on the board will die or live according to Conway's rules&lt;/li&gt;&lt;li&gt;Time is perceived as a sequence of transitions between board states&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Here are all the actions I wanted to enable:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Changing a cell from dead to alive by clicking on the board&lt;/li&gt;&lt;li&gt;Simulating a time change by clicking a &lt;em&gt;Next&lt;/em&gt; button&lt;/li&gt;&lt;li&gt;Loading predefined boards to quickly visualize some interesting shapes in Conway's Game of Life&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Disclaimer: I am an Elm beginner (This is actually my first Elm program). Please forgive my bad coding style if you are more experienced. I would love to know the proper ways to achieve some data transformation. Feel free to reach out.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;modeling&amp;#95;state&quot;&gt;&lt;/a&gt;Modeling State&lt;/h3&gt;&lt;p&gt;I model the game as follows:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Cell: Dead/Alive are modeled with booleans&lt;/li&gt;&lt;li&gt;Board: 2 dimensional array of Cells&lt;/li&gt;&lt;li&gt;Position: a position on the board is a hashmap with the keys &lt;em&gt;x&lt;/em&gt; and &lt;em&gt;y&lt;/em&gt;. I could be using a tuple for that but I wanted to play with the hashmap datastructure.&lt;/li&gt;&lt;/ul&gt;&lt;pre&gt;&lt;code&gt;type alias Position = { x : Int, y : Int }
+
+type alias Model = A.Array &amp;#40;A.Array Bool&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;manipulating&amp;#95;state&quot;&gt;&lt;/a&gt;Manipulating State&lt;/h3&gt;Maybe I am reinventing the wheel but I need some helper functions to manipulate my states.&lt;h4&gt;&lt;a name=&quot;board&quot;&gt;&lt;/a&gt;Board&lt;/h4&gt;I need to be able to tell the width and height of a board.&lt;pre&gt;&lt;code&gt;height : Model -&amp;gt; Int
+height model = A.length model
+
+width : Model -&amp;gt; Int
+width model =
+    case A.get 0 model of
+        Nothing -&amp;gt; 0
+        Just row -&amp;gt; A.length row
+&lt;/code&gt;&lt;/pre&gt;I also need to update a Cell value on the board given a Position.&lt;pre&gt;&lt;code&gt;getIn : A.Array &amp;#40;A.Array a&amp;#41; -&amp;gt; Position -&amp;gt; Maybe a
+getIn model position =
+    case A.get position.x model of
+        Nothing -&amp;gt; Nothing
+        Just row -&amp;gt; A.get position.y row
+
+assocIn : A.Array &amp;#40;A.Array a&amp;#41; -&amp;gt; Position -&amp;gt; a -&amp;gt; A.Array &amp;#40;A.Array a&amp;#41;
+assocIn model position x =
+    case A.get position.x model of
+        Nothing -&amp;gt; model
+        Just row -&amp;gt;
+            let updatedRow = A.set position.y x row
+            in
+                A.set position.x updatedRow model
+
+updateIn : A.Array &amp;#40;A.Array a&amp;#41; -&amp;gt; Position -&amp;gt; &amp;#40;a -&amp;gt; a&amp;#41; -&amp;gt; A.Array &amp;#40;A.Array a&amp;#41;
+updateIn model position f =
+    case getIn model position of
+        Nothing -&amp;gt; model
+        Just b -&amp;gt; assocIn model position &amp;#40;f b&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I found the Array core package lacking some important functions. I reimplemented some functions to manipulate 2d arrays (Clojure like functions).&lt;/p&gt;&lt;h4&gt;&lt;a name=&quot;positions&quot;&gt;&lt;/a&gt;Positions&lt;/h4&gt;I need a constructor for creating Position values&lt;pre&gt;&lt;code&gt;position : Int -&amp;gt; Int -&amp;gt; Position
+position i j = { x = i, y = j }
+
+positions : Model -&amp;gt; List Position
+positions model =
+    let w = width model
+        h = height model
+    in List.concatMap &amp;#40;\i -&amp;gt; &amp;#40;List.map &amp;#40;position i&amp;#41; &amp;#40;range 0 w&amp;#41;&amp;#41;&amp;#41; &amp;#40;range 0 h&amp;#41;
+
+&lt;/code&gt;&lt;/pre&gt;I wish Elm had list comprehensions or at least monadic operations to operate on Lists, Arrays and Maybe values.Here I had to basically reimplement the Haskell &gt;&gt;= for lists. I am sure there is a rationale for not having them in Elm. I have not figured it out yet though ;)&lt;pre&gt;&lt;code&gt;List.concatMap &amp;#40;\i -&amp;gt; &amp;#40;List.map &amp;#40;position i&amp;#41; &amp;#40;range 0 w&amp;#41;&amp;#41;&amp;#41; &amp;#40;range 0 h&amp;#41;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;update&quot;&gt;&lt;/a&gt;Update&lt;/h3&gt;&lt;p&gt;The update part of the Elm program is usually really short and can be seen as a FSM (Finite State Machine) with Actions and Models. The Action type is an union type that describes the possible actions that can be performed on the model. The &lt;code&gt;update&lt;/code&gt; function is a reducer function from actions to models. This pattern can be found in re-frame (ClojureScript) and React as well.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;type Action = Next
+            | LoadBoard Model
+            | ToggleValue Position
+
+update : Action -&amp;gt; Model -&amp;gt; Model
+update action model =
+    case action of
+        Next -&amp;gt; next model
+        LoadBoard model -&amp;gt; model
+        ToggleValue pos -&amp;gt; updateIn model pos not
+&lt;/code&gt;&lt;/pre&gt;&lt;h4&gt;&lt;a name=&quot;business&amp;#95;logic&amp;#95;(update&amp;#95;logic)&quot;&gt;&lt;/a&gt;Business Logic (Update Logic)&lt;/h4&gt;&lt;p&gt;All the logic is composition of pure functions and is located in one place. Here is the business logic needed to transition from one board state to the next.&lt;/p&gt;&lt;pre&gt;&lt;code&gt;isValid : Model -&amp;gt; Position -&amp;gt; Bool
+isValid model position =
+    let w = width model
+        h = height model
+        x = position.x
+        y = position.y
+    in
+        if x &amp;gt;= h then False
+        else if y &amp;gt;= w then False
+        else if x &amp;lt; 0 then False
+        else if y &amp;lt; 0 then False
+        else True
+
+neighbors : Model -&amp;gt; Position -&amp;gt; List Position
+neighbors model pos =
+    let w = width model
+        h = height model
+        x = pos.x
+        y = pos.y
+    in
+        &amp;#91; &amp;#40;x + 1, y&amp;#41;, &amp;#40;x + 1, y + 1&amp;#41;, &amp;#40;x + 1, y - 1&amp;#41;
+        , &amp;#40;x , y + 1&amp;#41;, &amp;#40;x, y - 1&amp;#41;
+        , &amp;#40;x - 1, y&amp;#41;, &amp;#40;x - 1, y + 1&amp;#41;, &amp;#40;x - 1, y - 1&amp;#41;
+        &amp;#93;
+            |&amp;gt; List.map &amp;#40;\&amp;#40;i, j&amp;#41; -&amp;gt; position i j&amp;#41;
+            |&amp;gt; List.filter &amp;#40;isValid model&amp;#41;
+
+isDead : Model -&amp;gt; Position -&amp;gt; Bool
+isDead model position =
+    case getIn model position of
+        Nothing -&amp;gt; False
+        Just b -&amp;gt; not b
+
+isAlive : Model -&amp;gt; Position -&amp;gt; Bool
+isAlive model = not &amp;lt;&amp;lt; isDead model
+
+rules : Bool -&amp;gt; Int -&amp;gt; Int -&amp;gt; Bool
+rules self deadCellCount aliveCellCount =
+    if self &amp;amp;&amp;amp; aliveCellCount &amp;lt; 2 then False
+    else if self &amp;amp;&amp;amp; aliveCellCount &amp;gt;= 2 &amp;amp;&amp;amp; aliveCellCount &amp;lt;= 3 then True
+    else if not self &amp;amp;&amp;amp; aliveCellCount == 3 then True
+    else False
+
+next : Model -&amp;gt; Model
+next model =
+    positions model
+        |&amp;gt; List.foldl &amp;#40;\position m -&amp;gt; assocIn m position &amp;#40;nextCellState model position&amp;#41;&amp;#41; model
+
+nextCellState : Model -&amp;gt; Position -&amp;gt; Bool
+nextCellState model position =
+    let neighbs = neighbors model position
+        deadCellCount = List.length &amp;#40;List.filter &amp;#40;isDead model&amp;#41; neighbs&amp;#41;
+        aliveCellCount = List.length &amp;#40;List.filter &amp;#40;isAlive model&amp;#41; neighbs&amp;#41;
+    in case &amp;#40;getIn model position&amp;#41; of
+        Nothing -&amp;gt; False
+        Just self -&amp;gt; rules self deadCellCount aliveCellCount
+&lt;/code&gt;&lt;/pre&gt;&lt;h3&gt;&lt;a name=&quot;view&quot;&gt;&lt;/a&gt;View&lt;/h3&gt;The last missing piece of our Elm program is the view. Which is a pure function of the model.&lt;pre&gt;&lt;code&gt;viewCell : Signal.Address Action -&amp;gt; Position -&amp;gt; Int -&amp;gt; Bool -&amp;gt; Html
+viewCell address position width b =
+    div &amp;#91; viewCellStyle width b
+        , onClick address &amp;#40;ToggleValue position&amp;#41;
+        , class &amp;#40;&amp;quot;cell-item&amp;quot; ++ &amp;quot; &amp;quot; ++ &amp;#40;if b then &amp;quot;cell-alive&amp;quot; else &amp;quot;cell-dead&amp;quot;&amp;#41;&amp;#41;
+        &amp;#93; &amp;#91;&amp;#93;
+
+selectBoardView : Signal.Address Action -&amp;gt; List &amp;#40;String, Model&amp;#41; -&amp;gt; Html
+selectBoardView address models =
+    div &amp;#91; class &amp;quot;btn-group pull-right&amp;quot; &amp;#93;
+        &amp;#40;List.map &amp;#40;\&amp;#40;s, m&amp;#41; -&amp;gt; div &amp;#91; class &amp;quot;btn btn-default&amp;quot;
+                                  , onClick address &amp;#40;LoadBoard m&amp;#41; &amp;#93;
+                                  &amp;#91; text s &amp;#93;&amp;#41; models&amp;#41;
+
+view : Signal.Address Action -&amp;gt; Model -&amp;gt; Html
+view address model =
+    let w = width model
+    in
+        div &amp;#91;class &amp;quot;game-container&amp;quot; &amp;#93;
+            &amp;#91; css &amp;quot;game.css&amp;quot;
+            , css &amp;quot;//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css&amp;quot;
+            , div &amp;#91; class &amp;quot;button-container&amp;quot; &amp;#93;
+                  &amp;#91;div &amp;#91; class &amp;quot;btn btn-default&amp;quot;
+                       , onClick address Next&amp;#93;
+                        &amp;#91;text &amp;quot;Next&amp;quot;&amp;#93;
+                  , selectBoardView address boards
+                &amp;#93;
+            , div &amp;#91; class &amp;quot;board-container&amp;quot; &amp;#93;
+                  &amp;#40;List.indexedMap &amp;#40;\k b -&amp;gt; viewCell address &amp;#40;intToPosition k w&amp;#41; w b&amp;#41; &amp;#40;A.toList &amp;#40;concat model&amp;#41;&amp;#41;&amp;#41;
+            &amp;#93;
+
+viewCellStyle : Int -&amp;gt; Bool -&amp;gt; Attribute
+viewCellStyle width b =
+    style &amp;#91; &amp;#40;&amp;quot;flex-basis&amp;quot;, toString &amp;#40;100.0 / &amp;#40;toFloat width&amp;#41;&amp;#41; ++ &amp;quot;%&amp;quot;&amp;#41; &amp;#93;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;All the view functions are purely declarative. We never need to take care of DOM mutations because Elm takes care of that for us.&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;entrypoint&quot;&gt;&lt;/a&gt;Entrypoint&lt;/h3&gt;The main entrypoint of our program is the following &lt;code&gt;main&lt;/code&gt; function:&lt;pre&gt;&lt;code&gt;main =
+  start
+    { model = pulsar
+    , update = update
+    , view = view
+    }
+
+pulsar = A.fromList &amp;#91; A.fromList &amp;#91; False, False, False, False, False, False, False, False, False, False, False, False, False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, True,  True,  True,  False, False, False, True,  True,  True,  False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, False, False, False, False, False, False, False, False, False, False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, True,  True,  True,  False, False, False, True,  True,  True,  False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, False, False, False, False, False, False, False, False, False, False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, True,  True,  True,  False, False, False, True,  True,  True,  False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, True,  False, False, False, False, True,  False, True,  False, False, False, False, True,  False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, False, False, False, False, False, False, False, False, False, False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, True,  True,  True,  False, False, False, True,  True,  True,  False, False, False &amp;#93;
+                    , A.fromList &amp;#91; False, False, False, False, False, False, False, False, False, False, False, False, False, False, False &amp;#93;
+                    &amp;#93;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2&gt;&lt;a name=&quot;result&quot;&gt;&lt;/a&gt;Result&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/posts/img/gameoflife/gameoflife.png&quot; alt=&quot;Conway's Game of Life in Elm&quot; /&gt;&lt;h2&gt;&lt;a name=&quot;the&amp;#95;end&quot;&gt;&lt;/a&gt;The End&lt;/h2&gt;&lt;/p&gt;&lt;p&gt;I really enjoyed learning a bit of Elm and coding that small application. The learning curve is really smooth and if you happen to know Haskell you can start coding in Elm right away. Frontend is getting fun again thanks to Functional Reactive Programming. We should all be thankful to Elm since it has paved he way to bringing awesomeness to the frontend (Redux, React, re-frame...).&lt;/p&gt;&lt;h3&gt;&lt;a name=&quot;pros&quot;&gt;&lt;/a&gt;Pros&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Type System&lt;/strong&gt;: it speeds up development with its awesome error messages and strong guarantees (no runtime exceptions)&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Persistent Data Structures&lt;/strong&gt;: all the most common datastructures are available in Elm core and are persistent (functional):&lt;ul&gt;&lt;li&gt;Records (Hashmap)&lt;/li&gt;&lt;li&gt;Lists&lt;/li&gt;&lt;li&gt;Arrays&lt;/li&gt;&lt;li&gt;Sets&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Fun&lt;/strong&gt;: Elm is really fun to use (do not underestimate this because this is the main feature of Ruby).&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Elm Architecture&lt;/strong&gt;: so simple but powerful way to compose and reuse pure functional code.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Tooling&lt;/strong&gt;: amazing tooling to recompile from the browser and hot swap code&lt;ul&gt;&lt;li&gt;Time traveling debugger&lt;/li&gt;&lt;li&gt;Hot code swapping&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;&lt;a name=&quot;cons&quot;&gt;&lt;/a&gt;Cons&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Lack of adhoc polymorphism&lt;/strong&gt; (Haskell Typeclasses/Clojure protocols...): it is painful to use different functions (eg. List.map, Array.map, Set.map, ...) to perform similar operations on different datastructures. I think this is a even a deal breaker not to incorporate this in Elm.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Javascript interop&lt;/strong&gt;: it seems like a lot of ceremony to interop with javascipt libraries. You need to use &lt;code&gt;ports&lt;/code&gt; and send messages back and forth. I do not see a simple solution to call javascript code directly from Elm code without using ports though.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Very young language&lt;/strong&gt;: The Elm community seems very excited and is growing all the time. Some fundamental libraries are not there yet and it may take a long time to get there.&lt;/li&gt;&lt;/ul&gt;
+</description>
+<enclosure>
+
+</enclosure>
+<pubDate>
+Tue, 08 Mar 2016 00:00:00 -0800
+</pubDate>
+</item>
 <item>
 <guid>
 http://simplelambda.com/posts/2016-03-03-mandelbrot-set.html
